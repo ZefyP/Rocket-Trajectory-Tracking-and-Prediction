@@ -20,6 +20,8 @@ class KalmanFilter:
     
   def predict(self, control_input):
     # Use the state transition matrix to predict the next state
+    # In this code, the @ operator is being used to multiply the state transition matrix by the 
+    # state mean, then adding the control input. This is used to predict the next state.
     self.state_mean = self.state_transition @ self.state_mean + control_input
     
     # Use the process noise to compute the state covariance
