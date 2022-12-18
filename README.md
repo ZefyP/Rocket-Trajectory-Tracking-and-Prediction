@@ -11,4 +11,21 @@ The code is organized into several modules, including:
 
 In addition, the repository contains sample data files and a documentation file.
 
+
+# Requirements
+
+The following packages are required to run the code in this repository:
+
+* pyqt5
+* numpy
+* matplotlib
+
+To install these packages, run the following command:
+
+`pip install -r requirements.txt`
+
+These are the packages are required to run the code in the repository. The pip install command can be used to install all of these packages at once by specifying the requirements file (requirements.txt). This makes it easier to set up the necessary software environment for running the code.
+
+
 This code is available for use under the MIT License.
+
