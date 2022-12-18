@@ -1,0 +1,41 @@
+import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        # Create widgets
+        self.label = QLabel("Enter mission parameters:", self)
+        self.line_edit = QLineEdit(self)
+        self.button = QPushButton("Predict Trajectory", self)
+
+        # Set widget positions
+        self.label.move(20, 20)
+        self.line_edit.move(20, 50)
+        self.button.move(20, 80)
+
+        # Connect button click to function
+        self.button.clicked.connect(self.predictTrajectory)
+
+        # Set window properties
+        self.setGeometry(300, 300, 300, 200)
+        self.setWindowTitle("Trajectory Prediction Tool")
+        self.show()
+
+    def predictTrajectory(self):
+        # Get mission parameters from line edit
+        mission_parameters = self.line_edit.text()
+
+        # Perform trajectory prediction using mission parameters
+        predicted_trajectory = predict(mission_parameters)
+
+        # Display result in window
+        self.label.setText("Predicted Trajectory: " + predicted_trajectory)
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    sys.exit(app.exec_())
