@@ -9,7 +9,7 @@ import simplekml
 
 class Stage:
     """
-    Represents one stage of a missile or rocket
+    Represents one stage of a rocket or rocket
     
     All units are SI unless otherwise specified
     """
@@ -145,7 +145,7 @@ class Stage:
         return mach_number
 
     def get_gravity_vector(self, position_index, mass):
-        # Calculate the gravitational force vector acting on the missile at a specific position index and mass
+        # Calculate the gravitational force vector acting on the rocket at a specific position index and mass
         current_position = self.position[:, position_index]
         position_magnitude = np.sqrt(
             current_position.dot(current_position)

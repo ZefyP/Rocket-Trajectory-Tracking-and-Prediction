@@ -16,24 +16,24 @@ plt.style.use("ggplot")
 
 
 class Rocket:
-    # name of the missile
+    # name of the rocket
     name: str
 
-    # country operating the missile
+    # country operating the rocket
     country: str
 
-    # list of stages of the missile
+    # list of stages of the rocket
     # index 0 is the first (lower) stage, last item represents the "warhead"
     stages: List[Stage] = []
 
-    # user defined drag characteristics of missile
+    # user defined drag characteristics of rocket
     # takes a function with the following parameters:
     # 0: List[Stage] - list of connected stages to calculate drag for
     # 1: float - current mach number of body
     # the function must return a float, the drag coefficient
     drag_function: Callable[[List[Stage], float], float]
 
-    # user defined thrust characteristics of missile 
+    # user defined thrust characteristics of rocket 
     # returns a thrust vector in Newtons
     # 0: List[Stage] - list of connected stages to calculate thrust for
     # 1: int - current 'position index' of body
@@ -213,7 +213,7 @@ class Rocket:
                 f_centrifugal = np.cross(- mass * omega, np.cross(omega, r))
                 f_coriolis = np.cross(-2 * mass * omega, v_r)
 
-                # add up forces acting on the missile
+                # add up forces acting on the rocket
                 sum_forces = drag_vector + gravity_vector + thrust_vector + f_centrifugal + f_coriolis
 
                 # determine acceleration (F=ma)

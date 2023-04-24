@@ -4,10 +4,12 @@ from .constants import EARTH_RADIUS
 
 
 def ecef2aer(a, b):
+    # https://uk.mathworks.com/help/map/ref/ecef2aer.html
     return enu2aer(ecef2enu(a, b))
 
 
 def ecef2enu(a, b):
+    # https://uk.mathworks.com/help/map/ref/ecef2enu.html
     # https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ECEF_to_ENU
     lat, long, alt = ecef2lla(a[0], a[1], a[2])
     lat, long, alt = float(lat), float(long), float(alt)
@@ -26,6 +28,9 @@ def ecef2enu(a, b):
 
 
 def enu2aer(enu):
+    """
+    https://uk.mathworks.com/help/map/ref/enu2aer.html
+    """
     _range = np.linalg.norm(enu)
     azimuth = np.arctan2(enu[0], enu[1])
     elevation = np.arcsin(enu[2] / _range)
@@ -36,6 +41,7 @@ def enu2aer(enu):
 def aer2enu(azimuth, elevation, _range):
     """
     Convert azimuth, elevation and range to local East, North Up coordinates
+    https://uk.mathworks.com/help/map/ref/aer2enu.html
     """
     cos_azimuth = np.cos(np.radians(azimuth))
     cos_elevation = np.cos(np.radians(elevation))
@@ -53,6 +59,8 @@ def aer2enu(azimuth, elevation, _range):
 
 def enu2ecef(enu, obs_lat, obs_long, obs_alt):
     """
+    https://uk.mathworks.com/help/map/ref/enu2ecef.html
+
     Convert local East, North, Up coordinates to ECEF coordinates given 
     a latitude, longitude and altitude
     
@@ -76,6 +84,7 @@ def enu2ecef(enu, obs_lat, obs_long, obs_alt):
 
 
 def aer2ecef(azimuth, elevation, _range, obs_lat, obs_long, obs_alt):
+    # https://uk.mathworks.com/help/map/ref/aer2ecef.html
     enu = aer2enu(azimuth, elevation, _range)
     ecef = enu2ecef(enu, obs_lat, obs_long, obs_alt)
     return ecef
@@ -83,38 +92,59 @@ def aer2ecef(azimuth, elevation, _range, obs_lat, obs_long, obs_alt):
 
 def aer2ecef_unit_vector(azimuth, elevation, obs_lat, obs_long, obs_alt):
     """
+    https://uk.mathworks.com/help/map/ref/aer2ecef.html
+
     Given a current azimuth, elevation and range, as well as a latitude, 
     longitude and altitude, calculate an ECEF unit vector pointing in the 
-    direction of a target
+    direction of a target.
     
     Used to calculate launch directions 
     """
-
+    # Convert azimuth, elevation, and range to ENU coordinates
     enu = aer2enu(azimuth, elevation, 1)
+    # Convert observer's latitude, longitude, and altitude to ECEF coordinates
     ecef_obs = lla2ecef(obs_lat, obs_long, obs_alt)
+    # Convert ENU to ECEF coordinates
     ecef = enu2ecef(enu, obs_lat, obs_long, obs_alt)
-
+    # Convert ENU to ECEF coordinates by subtracting the observer's ECEF pos from target's EXEF pos
     return ecef - ecef_obs
 
 
 # source: https://github.com/kvenkman/ecef2lla
 # other source (more credible) https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/7942/versions/1/previews/lla2ecef.m/index.html
 def lla2ecef(lat, lon, alt):
-    a = 6378137
-    a_sq = a ** 2
-    e = 8.181919084261345e-2
-    e_sq = e ** 2
-    b_sq = a_sq * (1 - e_sq)
+    """
+    Convert latitude, longitude and altitude to Earth-Centered Earth-Fixed (ECEF) coordinates.
 
+    Uses the WGS84 reference ellipsoid model.
+
+    Args:
+        lat (float): Latitude in degrees.
+        lon (float): Longitude in degrees.
+        alt (float): Altitude in meters.
+
+    Returns:
+        np.ndarray: 3D ECEF coordinates in meters.
+    """
+    # Set WGS84 constants
+    a = 6378137                 # Semi-major axis
+    a_sq = a ** 2              
+    e = 8.181919084261345e-2    # Eccentricity
+    e_sq = e ** 2               
+    b_sq = a_sq * (1 - e_sq)    # Semi-minor axis squared
+    
+    # Convert lat, lon to radians
     lat = lat * np.pi / 180
     lon = lon * np.pi / 180
     alt = alt
 
+    # Calculate N (the radius of curvature in the prime vertical)
     N = a / np.sqrt(1 - e_sq * np.sin(lat) ** 2)
+    # Calculate x, y, z ECEF coordinates
     x = (N + alt) * np.cos(lat) * np.cos(lon)
     y = (N + alt) * np.cos(lat) * np.sin(lon)
     z = ((b_sq / a_sq) * N + alt) * np.sin(lat)
-
+    # Combine into a single 3D array
     result = np.array([x, y, z])
 
     return result
