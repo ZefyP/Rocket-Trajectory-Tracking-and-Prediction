@@ -9,7 +9,7 @@ import simplekml
 
 class Stage:
     """
-    Represents one stage of a missile or rocket
+    This class represents one stage of a body/missile or rocket
     
     All units are SI unless otherwise specified
     """
@@ -112,7 +112,7 @@ class Stage:
         # np arrays must be created within constructor to prevent memory
         # sharing across all instances meaning stages have identical trajectories
         self.time = np.arange(0, TRAJECTORY_TIMEOUT, TIME_STEP)
-        self.position = np.zeros((3, N_TIME_INTERVALS))
+        self.position = np.zeros((3, N_TIME_INTERVALS)) # 3-dimensional vectors for xyz
         self.velocity = np.zeros((3, N_TIME_INTERVALS))
         self.acceleration = np.zeros((3, N_TIME_INTERVALS))
         self.gravity_vectors = np.zeros((3, N_TIME_INTERVALS))
@@ -145,12 +145,21 @@ class Stage:
 
     def get_gravity_vector(self, position_index, mass):
         current_position = self.position[:, position_index]
+        #  The dot product of a vector with itself is equal to the square of its magnitude. Therefore, taking the square root of the dot product gives you the magnitude of the vector.
         position_magnitude = np.sqrt(
             current_position.dot(current_position)
         )
+        # This line calculates the direction of the gravity vector. It first negates the current position vector to get the direction pointing towards the center of the earth. 
+        # It then divides this direction vector by its magnitude to normalise it to a unit vector.
         gravity_direction = - current_position / position_magnitude
 
+        # Calculate the magnitude of the gravity vector based on the mass of the rocket and 
+        # the distance from the center of the earth. It uses the formula for the gravitational force 
+        # between two objects: F = G * m1 * m2 / r^2, where G is the gravitational constant, m1 and m2 are 
+        # the masses of the two objects, and r is the distance between their centers of mass. 
+        # This formula is simplified based on its mass and distance from the center of the earth.
         gravity_magnitude = ((6.67e-11 * 5.972e24 * mass) / position_magnitude ** 2)
+        # The gravity vector is the product of its magnitude and direction.
         return gravity_magnitude * gravity_direction
 
     def get_lla_position_vector(self):

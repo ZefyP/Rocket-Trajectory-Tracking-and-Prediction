@@ -1,24 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ======================================================================
-# AMBIANCE -- A full implementation of the ICAO standard atmosphere 1993
-#
-#  Copyright 2019-2020 Aaron Dettmann
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-# ======================================================================
-
 """
 Compute atmospheric properties for heights ranging from -5 km to 80 km.
 
@@ -33,7 +15,6 @@ References:
 
 .. [WISA19] Wikipedia ; International Standard Atmosphere ;
             https://en.wikipedia.org/wiki/International_Standard_Atmosphere
-            Accessed: 2019-07-28
 """
 
 from itertools import tee
@@ -150,13 +131,13 @@ class CONST:
     _LAYER_NAME_e = 'mesosphere'
 
     LAYER_SPEC_PROP = [
-        [-5.0e3, 320.65, -6.5e-3, 1.77687e+5, _LAYER_NAME_a],
-        [0.00e3, 288.15, -6.5e-3, 1.01325e+5, _LAYER_NAME_a],
-        [11.0e3, 216.65,  0.0e-3, 2.26320e+4, _LAYER_NAME_b],
-        [20.0e3, 216.65,  1.0e-3, 5.47487e+3, _LAYER_NAME_c],
+        [-5.0e3, 320.65, -6.5e-3, 1.77687e+5, _LAYER_NAME_a], # troposphere
+        [0.00e3, 288.15, -6.5e-3, 1.01325e+5, _LAYER_NAME_a], 
+        [11.0e3, 216.65,  0.0e-3, 2.26320e+4, _LAYER_NAME_b], # tropopause
+        [20.0e3, 216.65,  1.0e-3, 5.47487e+3, _LAYER_NAME_c], # stratosphere
         [32.0e3, 228.65,  2.8e-3, 8.68014e+2, _LAYER_NAME_c],
-        [47.0e3, 270.65,  0.0e-3, 1.10906e+2, _LAYER_NAME_d],
-        [51.0e3, 270.65, -2.8e-3, 6.69384e+1, _LAYER_NAME_e],
+        [47.0e3, 270.65,  0.0e-3, 1.10906e+2, _LAYER_NAME_d], # stratopause
+        [51.0e3, 270.65, -2.8e-3, 6.69384e+1, _LAYER_NAME_e], # mesosphere
         [71.0e3, 214.65, -2.0e-3, 3.95639e+0, _LAYER_NAME_e],
         [80.0e3, 196.65, -2.0e-3, 8.86272e-1, _LAYER_NAME_e],
     ]

@@ -11,10 +11,10 @@ class Launcher:
     altitude: float  # altitude of launch site
 
     azimuth: float  # azimuth of launch rail 
-    # north being 0°, east being 90°, south being 180°, and west being 270°
-    
+    # north is 0°, east 90°, south 180°, and west 270°
+
     elevation: float  # elevation of launch rail
-    #  horizon being 0°, the zenith (directly overhead) being 90°, and the nadir (directly below) being -90°.
+    #  horizon is 0°, the zenith (directly overhead) 90°, and the nadir (directly below) -90°.
 
     # unit vectors which give initial position and orientation of the missile on the pad
     # ECEF coordinates, see Stage.py for more details

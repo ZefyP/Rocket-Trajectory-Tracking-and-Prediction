@@ -134,7 +134,7 @@ class Rocket:
                     # and hence we must consider all stages that are above the 
                     # active stage.
 
-                    # for example, we must calculate mass by summming the 
+                    # for example, we must calculate mass by summing the 
                     # mass of all stages in the list below
                     stages_to_consider = self.stages[active_stage_index::]
 
@@ -200,8 +200,8 @@ class Rocket:
                     # coefficient of drag = 0 corresponds to no drag
                     drag_vector = np.array([0, 0, 0])
                 else:
-                    velocity = stage.velocity[:, i - 1]
-                    velocity_magnitude = np.sqrt(velocity.dot(velocity))
+                    velocity = stage.velocity[:, i - 1] # increment velocity per time interval
+                    velocity_magnitude = np.sqrt(velocity.dot(velocity)) # the dot product of two vectors gives the cosine of angle between them
                     if velocity_magnitude != 0:
                         drag_direction = - normalise_vector(stage.velocity[:, i - 1])
                     else:
@@ -233,7 +233,6 @@ class Rocket:
 
                 # update data stores of other useful variables about the flight
                 stage.drag_vectors[:, i] = drag_vector
-                stage.thrust_vectors[:, i] = thrust_vector
                 stage.gravity_vectors[:, i] = gravity_vector
 
                 lat, long, alt = stage.get_lla(i)
@@ -251,7 +250,6 @@ class Rocket:
                         other_connected_stage.velocity[:, i] = np.copy(stage.velocity[:, i])
                         other_connected_stage.position[:, i] = np.copy(stage.position[:, i])
                         other_connected_stage.drag_vectors[:, i] = np.copy(drag_vector)
-                        other_connected_stage.thrust_vectors[:, i] = np.copy(thrust_vector)
                         other_connected_stage.gravity_vectors[:, i] = np.copy(gravity_vector)
                         other_connected_stage.lla_vector[:, i] = np.copy(stage.lla_vector[:, i])
                         other_connected_stage.surface_position[:, i] = np.copy(stage.surface_position[:, i])
@@ -288,7 +286,6 @@ class Rocket:
                         _stage.velocity = stage.velocity[:, 0:i]
                         _stage.acceleration = stage.acceleration[:, 0:i]
                         _stage.gravity_vectors = stage.gravity_vectors[:, 0:i]
-                        _stage.thrust_vectors = stage.thrust_vectors[:, 0:i]
                         _stage.drag_vectors = stage.drag_vectors[:, 0:i]
                         _stage.lla_vector = stage.lla_vector[:, 0:i]
                         _stage.surface_position = stage.surface_position[:, 0:i]

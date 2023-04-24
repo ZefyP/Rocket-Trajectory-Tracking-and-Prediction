@@ -3,28 +3,6 @@ import numpy as np
 from .constants import EARTH_RADIUS
 
 
-def ecef2aer(a, b):
-    return enu2aer(ecef2enu(a, b))
-
-
-def ecef2enu(a, b):
-    # https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ECEF_to_ENU
-    lat, long, alt = ecef2lla(a[0], a[1], a[2])
-    lat, long, alt = float(lat), float(long), float(alt)
-
-    slat = np.sin(np.radians(lat))
-    slon = np.sin(np.radians(long))
-    clat = np.cos(np.radians(lat))
-    clon = np.cos(np.radians(long))
-
-    enu = np.matmul(np.array([
-        [- slat, clon, 0],
-        [- slat * clon, - slat * clon, clat],
-        [clat * clon, clat * slon, slat]
-    ]), b - a)
-    return enu
-
-
 def enu2aer(enu):
     _range = np.linalg.norm(enu)
     azimuth = np.arctan2(enu[0], enu[1])
