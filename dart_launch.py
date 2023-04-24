@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 #from simulator import Launcher, Stage, Rocket
-from trajectory_generator import Missile, Stage, Launcher
+from trajectory_generator import Rocket, Stage, Launcher
 
  
 booster = Stage(
@@ -30,7 +30,7 @@ launch_site = Launcher(
     azimuth=0, elevation=85
 )
 
-missile = Missile("SpaceDart", "Spacefleet", launch_site)
+missile = Rocket("SpaceDart", "Spacefleet", launch_site)
 missile.stages = [booster, dart]
 missile.run_simulation()
 missile.plot_altitude_range()

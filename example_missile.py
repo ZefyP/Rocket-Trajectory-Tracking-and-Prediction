@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .trajectory_generator import Rocket, Stage, Launcher
+from trajectory_generator import Rocket, Stage, Launcher
 
 lower_stage = Stage(
     name="Lower stage",

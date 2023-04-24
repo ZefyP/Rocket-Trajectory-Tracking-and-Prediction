@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from trajectory_generator import Missile, Stage, Launcher
+from trajectory_generator import Rocket, Stage, Launcher
 import os
 kmini2 = Stage(
     name="Karman Mini 2",
@@ -19,11 +19,11 @@ launch_site = Launcher(
     elevation=85 # pointing nearly to zenith
 )
 
-missile = Missile("KMini2", "Sunride", launch_site)
+missile = Rocket("KMini2", "Sunride", launch_site)
 missile.stages = [kmini2]
 missile.run_simulation()
 missile.plot_altitude_range()
-missile.plot_all()
+# missile.plot_all()
 
 for stage in missile.stages:
     output_dir = 'output'
