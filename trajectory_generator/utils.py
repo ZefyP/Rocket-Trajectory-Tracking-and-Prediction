@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+"""
+A collection of helper functions that can be used across multiple modules in this project. 
+It includes common mathematical operations and utilities for data processing. The functions have been sourced from Mathworks and designed 
+to be modular and reusable, with clear input and output specs. 
+The script is intended to improve code reusability, reduce code duplication and improve code readability.
+"""
 import numpy as np
 from .constants import EARTH_RADIUS
 
@@ -198,13 +204,15 @@ def ecef2lla(x, y, z):
 def fast_has_impacted_earth(ecef_coords: np.ndarray) -> bool:
     # calculate the distance from the ECEF coordinates to the center of the Earth
     distance_from_centre = np.sqrt(ecef_coords.dot(ecef_coords))
-    
+
     # check if the distance is less than the Earth's radius, indicating impact with the Earth
     if distance_from_centre < EARTH_RADIUS:
         return True
     else:
         return False
 
-
+# Calculate the norm of the input vector using np.linalg.norm().
+# This means scaling the magnitutde to length of 1 while preserving its direction.
+# It also simplifies calculations such as computing the dot product and determining the angle between two vectors.
 def normalise_vector(input_vector: np.ndarray):
     return input_vector / np.linalg.norm(input_vector)

@@ -18,16 +18,16 @@
             <name>Another stage</name>
             <description>           Another stage            
            =============            
-dry_mass:                   20.0 kg
-fuel_mass:                   5.0 kg
-total_mass:                 25.0 kg
-cross_sectional_area:  0.0314159 m^2
-thrust:                   5000.0 Newtons
-burn_time:                  10.0 s
-separation_time:             0.0 s
-flight time:               164.4 s
-apogee:                   24.619 km
-range:                   53.7528 km
+Dry Mass:                   20.0 kg
+Fuel Mass:                   5.0 kg
+Total Mass:                 25.0 kg
+Cross-Sectional Area:  0.0314159 m^2
+Thrust:                   5000.0 Newtons
+Burn Time:                  10.0 s
+Separation Time:             0.0 s
+Flight Time:               164.4 s
+Apogee:                   24.619 km
+Range:                   53.7528 km
 </description>
             <styleUrl>#18</styleUrl>
             <LineString id="16">

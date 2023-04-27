@@ -18,16 +18,16 @@
             <name>Upper stage</name>
             <description>            Upper stage             
             ===========             
-dry_mass:                  500.0 kg
-fuel_mass:                  50.0 kg
-total_mass:                550.0 kg
-cross_sectional_area:  0.0962113 m^2
-thrust:                  50000.0 Newtons
-burn_time:                  10.0 s
-separation_time:             0.0 s
-flight time:               118.2 s
-apogee:                  14.1794 km
-range:                   29.0162 km
+Dry Mass:                  500.0 kg
+Fuel Mass:                  50.0 kg
+Total Mass:                550.0 kg
+Cross-Sectional Area:  0.0962113 m^2
+Thrust:                  50000.0 Newtons
+Burn Time:                  10.0 s
+Separation Time:             0.0 s
+Flight Time:               118.2 s
+Apogee:                  14.1794 km
+Range:                   29.0162 km
 </description>
             <styleUrl>#11</styleUrl>
             <LineString id="9">

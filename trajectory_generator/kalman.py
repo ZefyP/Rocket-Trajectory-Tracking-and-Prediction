@@ -3,8 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 '''
-This function takes in the pressure measurements as well as the process noise 
-covariance matrix Q and the measurement noise covariance matrix R. The function returns the 
+This function takes in the pressure measurements as well as the process noise.
+Args:
+    Q: covariance matrix 
+    R: the measurement noise covariance matrix
+    The function returns the 
 estimated altitude and error at each time step.
 '''
 def kalman_filter(pressure, Q, R):
