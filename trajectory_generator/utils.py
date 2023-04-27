@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+This file contains functions for converting between ECEF, AER and ENU coordinate systems.
+Particularly between Earth-Centered Earth-Fixed (ECEF) and local East, North Up (ENU), 
+as well as between ECEF and azimuth, elevation, range (AER) coordinates.
+
+The WGS84 reference ellipsoid model is used for calculating the conversions.
+"""
 import numpy as np
 from .constants import EARTH_RADIUS
 

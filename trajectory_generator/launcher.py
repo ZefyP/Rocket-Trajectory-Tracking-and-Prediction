@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+
+"""
+This class represents the rocket launcher on the launch pad. 
+It utilises the launcher's name, location, orientation, and initial velocity.
+It includes methods to convert the launcher's latitude, longitude, and altitude to ECEF coordinates, 
+as well as calculate the unit vectors for the rocket's initial position and orientation on the launcher pad.
+"""
+
 import numpy as np
 from .utils import lla2ecef, aer2ecef_unit_vector
 
@@ -6,14 +14,14 @@ from .utils import lla2ecef, aer2ecef_unit_vector
 class Launcher:
     name: str
 
-    latitude: float  # latitude of launch site
-    longitude: float  # longitude of launch site
-    altitude: float  # altitude of launch site
+    latitude: float     # latitude of launch site
+    longitude: float    # longitude of launch site
+    altitude: float     # altitude of launch site
 
-    azimuth: float  # azimuth of launch rail
-    elevation: float  # elevation of launch rail
+    azimuth: float      # azimuth of launch rail
+    elevation: float    # elevation of launch rail
 
-    # unit vectors which give initial position and orientation of the missile on the pad
+    # Unit vectors which give initial position and orientation of the rocket on the pad
     # ECEF coordinates, see Stage.py for more details
     orientation_ECEF: np.ndarray
     position_ECEF: np.ndarray
