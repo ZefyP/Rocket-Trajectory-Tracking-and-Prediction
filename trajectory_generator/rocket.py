@@ -16,33 +16,37 @@ plt.style.use("ggplot")
 
 
 class Rocket:
-    # name of the rocket
+    # The name of the rocket.
     name: str
 
-    # country operating the rocket
+    # The country operating the rocket.
     country: str
 
-    # list of stages of the rocket
-    # index 0 is the first (lower) stage, last item represents the "warhead"
+    """
+    A list of stages of the rocket.
+    The index 0 represents the first (lower) stage, while the last item represents the upper stage.
+    """
     stages: List[Stage] = []
-
-    # user defined drag characteristics of rocket
-    # takes a function with the following parameters:
-    # 0: List[Stage] - list of connected stages to calculate drag for
-    # 1: float - current mach number of body
-    # the function must return a float, the drag coefficient
+   
+    """
+    A user-defined function to calculate the drag characteristics of the rocket.
+    The function takes the following parameters:
+    0: List[Stage] - A list of connected stages to calculate the drag for.
+    1: float - The current Mach number of the body.
+    The function must return a float that represents the drag coefficient.
+        """
     drag_function: Callable[[List[Stage], float], float]
 
-    # user defined thrust characteristics of rocket 
-    # returns a thrust vector in Newtons
-    # 0: List[Stage] - list of connected stages to calculate thrust for
-    # 1: int - current 'position index' of body
-    # the function must return an ECEF thrust vector
-    
-    
-    
+    """
+    User-defined function to calculate the thrust characteristics of the rocket.
+    The function returns a thrust vector in Newtons.
+    The function takes the following parameters:
+    0: List[Stage] - A list of connected stages to calculate the thrust for.
+    1: int - The current 'position index' of the body.
+    The function must return an ECEF thrust vector.
+    """
     thrust_function: Callable[[List[Stage], int], np.ndarray]
-
+   
     launcher: Launcher
 
     def __init__(self, name: str, country: str, launcher: Launcher,
@@ -55,7 +59,7 @@ class Rocket:
         self.drag_function = drag_function
         self.thrust_function = thrust_function
 
-        # set this to False to silence solver output
+        # Set this to False to silence solver output
         self.logging_enabled = True
 
     def run_simulation(self):
@@ -240,7 +244,7 @@ class Rocket:
                                   np.linalg.norm(stage.surface_position[:, i] - stage.surface_position[:, i - 1])
 
                 if stage == upper_stage:
-                    # copy trajectory data to connected stages
+                    # copy trajectory data to the connected stages
                     for other_connected_stage in stages_to_consider[:-1]:
                         other_connected_stage.acceleration[:, i] = np.copy(stage.acceleration[:, i])
                         other_connected_stage.velocity[:, i] = np.copy(stage.velocity[:, i])
@@ -274,7 +278,7 @@ class Rocket:
                             )
                         )
                     else:
-                        stages_to_truncate = [stage]
+                        stages_to_truncate= [stage]
 
                     for _stage in stages_to_truncate:
                         # stage has impacted ground, truncate data stores and skip this stage
@@ -318,6 +322,12 @@ class Rocket:
             altitude = lla_position_vector[2, :]
             
             plt.plot(stage._range / 1000, altitude / 1000, label=stage.name)
+        
+        # plot the apogee
+        apogee = np.amax(altitude)
+        plt.plot(0, apogee / 1000, 'ro', label=f"Apogee: {apogee/1000:.2f} km")
+        plt.xlim(0, np.amax([stage._range[-1] for stage in self.stages]) / 1000)
+        
         
         # # plot the apogee
         # apogee = np.amax(altitude)

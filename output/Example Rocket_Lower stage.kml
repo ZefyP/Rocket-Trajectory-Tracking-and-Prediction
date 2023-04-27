@@ -18,16 +18,16 @@
             <name>Lower stage</name>
             <description>            Lower stage             
             ===========             
-dry_mass:                 1000.0 kg
-fuel_mass:                 100.0 kg
-total_mass:               1100.0 kg
-cross_sectional_area:    0.19635 m^2
-thrust:                    3e+05 Newtons
-burn_time:                  10.0 s
-separation_time:             1.0 s
-flight time:                77.4 s
-apogee:                   6.2792 km
-range:                   10.3942 km
+Dry Mass:                 1000.0 kg
+Fuel Mass:                 100.0 kg
+Total Mass:               1100.0 kg
+Cross-Sectional Area:    0.19635 m^2
+Thrust:                    3e+05 Newtons
+Burn Time:                  10.0 s
+Separation Time:             1.0 s
+Flight Time:                77.4 s
+Apogee:                   6.2792 km
+Range:                   10.3942 km
 </description>
             <styleUrl>#4</styleUrl>
             <LineString id="2">

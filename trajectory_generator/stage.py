@@ -209,29 +209,29 @@ class Stage:
         )
 
     def __str__(self):
-        fp = 6  # float precision
-        width = 10
-        align = ">"
+        precision = 6  # float precision
+        column_width = 10
+        alignment = ">"
+        
+        extra_info = ""
 
-        extra_details = ""
-
-        fmt = f"{align}{width}.{fp}"
+        format_string = f"{alignment}{column_width}.{precision}"
 
         if self.has_impacted_ground:
             altitude = self.lla_vector[2, :]
             apogee = np.amax(altitude)
 
-            extra_details = \
-                f"flight time:          {float(self.time[-1]):{fmt}} s\n" + \
-                f"apogee:               {float(apogee / 1000):{fmt}} km\n" + \
-                f"range:                {float(self._range[-1] / 1000):{fmt}} km\n"
-
+            extra_info = \
+                f"Flight Time:          {float(self.time[-1]):{format_string}} s\n" + \
+                f"Apogee:               {float(apogee / 1000):{format_string}} km\n" + \
+                f"Range:                {float(self._range[-1] / 1000):{format_string}} km\n"
+            
         return f"{self.name:^36}\n{'=' * len(self.name):^36}\n" + \
-               f"dry_mass:             {float(self.dry_mass):{fmt}} kg\n" + \
-               f"fuel_mass:            {float(self.fuel_mass):{fmt}} kg\n" + \
-               f"total_mass:           {float(self.total_mass):{fmt}} kg\n" + \
-               f"cross_sectional_area: {float(self.cross_sectional_area):{fmt}} m^2\n" + \
-               f"thrust:               {float(self.thrust):{fmt}} Newtons\n" + \
-               f"burn_time:            {float(self.burn_time):{fmt}} s\n" + \
-               f"separation_time:      {float(self.separation_time):{fmt}} s\n" + \
-               extra_details
+               f"Dry Mass:             {float(self.dry_mass):{format_string}} kg\n" + \
+               f"Fuel Mass:            {float(self.fuel_mass):{format_string}} kg\n" + \
+               f"Total Mass:           {float(self.total_mass):{format_string}} kg\n" + \
+               f"Cross-Sectional Area: {float(self.cross_sectional_area):{format_string}} m^2\n" + \
+               f"Thrust:               {float(self.thrust):{format_string}} Newtons\n" + \
+               f"Burn Time:            {float(self.burn_time):{format_string}} s\n" + \
+               f"Separation Time:      {float(self.separation_time):{format_string}} s\n" + \
+               extra_info
