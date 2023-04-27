@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+"""
+A collection of helper functions that can be used across multiple modules in this project. 
+It includes common mathematical operations and utilities for data processing. The functions have been sourced from Mathworks and designed 
+to be modular and reusable, with clear input and output specs. 
+The script is intended to improve code reusability, reduce code duplication and improve code readability.
+"""
 import numpy as np
 from .constants import EARTH_RADIUS
 
@@ -149,57 +155,64 @@ def lla2ecef(lat, lon, alt):
 
     return result
 
-
-# it should be noted that converting ECEF to LLA is way more involved than
-#    the other way around
+# Convert ECEF coordinates to LLA coordinates.
+# Note that this conversion is utilised much more than the inverse.
 def ecef2lla(x, y, z):
-    # x, y and z are scalars or vectors in meters
+    # Convert input scalars or vectors to column vectors. [meters]
     x = np.array([x]).reshape(np.array([x]).shape[-1], 1)
     y = np.array([y]).reshape(np.array([y]).shape[-1], 1)
     z = np.array([z]).reshape(np.array([z]).shape[-1], 1)
+    
+    # Set WGS84 constants.
+    a = 6378137             # Semi-major axis
+    e_sq = 6.69437999014e-3 # Eccentricity squared
+    f = 1 / 298.257223563   # Flattening factor
+    b = a * (1 - f)         # Semi-minor axis
 
-    a = 6378137
-    e_sq = 6.69437999014e-3
-
-    f = 1 / 298.257223563
-    b = a * (1 - f)
-
-    # calculations:
-    r = np.sqrt(x ** 2 + y ** 2)
-    ep_sq = (a ** 2 - b ** 2) / b ** 2
-    ee = (a ** 2 - b ** 2)
+    # Calculations:
+    r = np.sqrt(x ** 2 + y ** 2)        # Distance from z-axis.
+    ep_sq = (a ** 2 - b ** 2) / b ** 2  # Eccentricity prime squared.
+    ee = (a ** 2 - b ** 2)              # Second eccentricity squared.
     f = (54 * b ** 2) * (z ** 2)
     g = r ** 2 + (1 - e_sq) * (z ** 2) - e_sq * ee * 2
     c = (e_sq ** 2) * f * r ** 2 / (g ** 3)
     s = (1 + c + np.sqrt(c ** 2 + 2 * c)) ** (1 / 3.)
     p = f / (3. * (g ** 2) * (s + (1. / s) + 1) ** 2)
     q = np.sqrt(1 + 2 * p * e_sq ** 2)
-    # RuntimeWarning: invalid value encountered in sqrt
-    # handle invalid (negative?) input to sqrt input over poles
+    
+    # Handle invalid (negative?) input to sqrt input over poles.
     sqrt_input = 0.5 * (a ** 2) * (1 + (1. / q)) - p * (z ** 2) * (1 - e_sq) / (q * (1 + q)) - 0.5 * p * (r ** 2)
     if np.any(sqrt_input < 0):
+        # Print warning message for negative sqrt input over poles.
         print(sqrt_input)
+        print("Negative square root input over poles detected.")
     sqrt_input[sqrt_input < 0] = 0
 
+    # Compute additional intermediate variables.
     r_0 = -(p * e_sq * r) / (1 + q) + np.sqrt(sqrt_input)
     u = np.sqrt((r - e_sq * r_0) ** 2 + z ** 2)
     v = np.sqrt((r - e_sq * r_0) ** 2 + (1 - e_sq) * z ** 2)
     z_0 = (b ** 2) * z / (a * v)
     h = u * (1 - b ** 2 / (a * v))
-    phi = np.arctan((z + ep_sq * z_0) / r)
-    lambd = np.arctan2(y, x)
-
+    phi = np.arctan((z + ep_sq * z_0) / r) # Phi is the geodetic latitude.
+    lambd = np.arctan2(y, x)               # Lambda is the # Geodetic latitude.
+    
+    # Convert from radians to degrees and return.
     return phi * 180 / np.pi, lambd * 180 / np.pi, h
 
 
 def fast_has_impacted_earth(ecef_coords: np.ndarray) -> bool:
+    # calculate the distance from the ECEF coordinates to the center of the Earth
     distance_from_centre = np.sqrt(ecef_coords.dot(ecef_coords))
 
+    # check if the distance is less than the Earth's radius, indicating impact with the Earth
     if distance_from_centre < EARTH_RADIUS:
         return True
     else:
         return False
 
-
+# Calculate the norm of the input vector using np.linalg.norm().
+# This means scaling the magnitutde to length of 1 while preserving its direction.
+# It also simplifies calculations such as computing the dot product and determining the angle between two vectors.
 def normalise_vector(input_vector: np.ndarray):
     return input_vector / np.linalg.norm(input_vector)

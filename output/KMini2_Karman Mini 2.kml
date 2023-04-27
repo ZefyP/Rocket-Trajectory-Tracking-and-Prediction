@@ -18,16 +18,16 @@
             <name>Karman Mini 2</name>
             <description>           Karman Mini 2            
            =============            
-dry_mass:                   45.0 kg
-fuel_mass:              0.277228 kg
-total_mass:              45.2772 kg
-cross_sectional_area:    0.13267 m^2
-thrust:                  68000.0 Newtons
-burn_time:                  1.01 s
-separation_time:             0.0 s
-flight time:                85.6 s
-apogee:                  8.50331 km
-range:                   1.88785 km
+Dry_mass:                   45.0 kg
+Fuel_mass:              0.277228 kg
+Total_mass:              45.2772 kg
+Cross_sectional_area:    0.13267 m^2
+Thrust:                  68000.0 Newtons
+Burn_time:                  1.01 s
+Separation_time:             0.0 s
+Flight time:                85.6 s
+Apogee:                  8.50331 km
+Range:                   1.88785 km
 </description>
             <styleUrl>#4</styleUrl>
             <LineString id="2">
