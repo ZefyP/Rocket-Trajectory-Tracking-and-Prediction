@@ -20,14 +20,15 @@ upper_stage = Stage(
     thrust=50e3,
     burn_time=10,
     diameter=0.35,
+    separation_time=50,
     kml_colour="ff3c14dc"
 )
 
 another_stage = Stage(
-    name="Another stage",
+    name="3rd stage",
     dry_mass=20,
-    fuel_mass=250,
-    thrust=5e3,
+    fuel_mass=0,
+    thrust=0,
     burn_time=10,
     diameter=0.2,
     kml_colour="ff91ff00"
@@ -43,6 +44,7 @@ missile = Rocket("Example Rocket", "BAE Systems", hebrides)
 missile.stages = [lower_stage, upper_stage, another_stage]
 missile.run_simulation()
 missile.plot_all()
+#missile.plot_accel()
 
 for stage in missile.stages:
     stage.export_KML(

@@ -50,11 +50,11 @@ class Wind:
         drag_force_z = drag_force_vector[2] + drag_force_side_vector[2]
 
         # Update rocket position and velocity using rocket equation
-        missile.update(dt, drag_force_x, drag_force_y, drag_force_z)
+        Rocket.update(dt, drag_force_x, drag_force_y, drag_force_z)
 
         # Store simulation results
         t_list.append(t*dt)
-        v_list.append(missile.velocity)
-        pos_list.append(missile.position)
+        v_list.append(Rocket.velocity)
+        pos_list.append(Rocket.position)
         return drift
 

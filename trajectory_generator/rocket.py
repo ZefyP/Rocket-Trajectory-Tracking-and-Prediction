@@ -206,7 +206,7 @@ class Rocket:
                     else:
                         drag_direction = 0
                     drag_vector = 1 / 2 * atmosphere.density * A * Cd * velocity_magnitude ** 2 * drag_direction
-                    self.log(f"[{self.name}] [{stage.time[i]}] DRAG {active_stage.name} with vector  {drag_vector} ") # ---------------
+                    # self.log(f"[{self.name}] [{stage.time[i]}] DRAG {active_stage.name} with vector  {drag_vector} ") # ---------------
 
                 # calculate centrifugal force
 
@@ -223,7 +223,12 @@ class Rocket:
 
                 # determine acceleration (F=ma)
                 acceleration = sum_forces / mass
-
+                
+                if stage.acceleration[0, i - 1] > 0 and stage.acceleration[0, i] < 0:
+                    self.log(f"[{acceleration}] OMG IS THIS APOGEE ??????????????? at time [{stage.time[i]}] ------------------------------!")                       
+                    
+                self.log(f"----------------------------[{acceleration}] at time [{stage.time[i]}] ------------------------------!")                       
+                
                 dt = stage.time[i] - stage.time[i - 1]
 
                 # propagate forward velocity and position based on current acceleration
@@ -313,6 +318,7 @@ class Rocket:
         plt.ylabel("Altitude (metres)")
 
         apogee = np.amax(altitude)
+        
         plt.axhline(y=apogee, color='r', linestyle='-')
         self.log(f"[{self.name}] Apogee is {apogee / 1000}km")
         plt.show()
@@ -361,6 +367,15 @@ class Rocket:
         plt.legend()
         plt.xlabel("Time (seconds)")
         plt.ylabel("Fuel Mass (kg)")
+        plt.show()
+
+    def plot_accel(self):
+        for stage in self.stages:
+            accel = np.linalg.norm(stage.acceleration[0,:], axis=0)
+            plt.plot(stage.time, accel, label=stage.name)
+        plt.legend()
+        plt.xlabel("Time (seconds)")
+        plt.ylabel("Accelleration (m/s^2)")
         plt.show()
 
     def plot_speed(self):
