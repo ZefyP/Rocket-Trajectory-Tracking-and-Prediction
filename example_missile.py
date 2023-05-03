@@ -43,7 +43,7 @@ hebrides = Launcher(
 missile = Rocket("Example Rocket", "BAE Systems", hebrides)
 missile.stages = [lower_stage, upper_stage, another_stage]
 missile.run_simulation()
-missile.plot_all()
+#missile.plot_all()
 #missile.plot_accel()
 
 for stage in missile.stages:

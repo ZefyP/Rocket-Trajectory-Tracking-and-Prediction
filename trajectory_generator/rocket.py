@@ -63,6 +63,9 @@ class Rocket:
         self.logging_enabled = True
 
     def run_simulation(self):
+        # set single use flag
+        looking_for_apogee = True
+        apogee_time = None
         # set initial position and velocity of each stage
         for stage in self.stages:
             stage.position[:, 0] = self.launcher.position_ECEF
@@ -94,7 +97,10 @@ class Rocket:
                     self.log(f"[{stage.name}] range is {round(stage._range[-1] / 1e3, 1)} km")
                     altitude = stage.get_lla_position_vector()[2, :]
                     apogee = np.amax(altitude)
-                    self.log(f"[{stage.name}] apogee is {round(apogee / 1000, 1)} km")
+                    print(len(stage.time))
+                    
+                    self.log(f"[{stage.name}] apogee is {round(apogee / 1000, 1)} km at {stage.time[-1]} seconds")
+                    
                 break
 
             # 'start the motor' if not started yet  
@@ -224,12 +230,16 @@ class Rocket:
                 # determine acceleration (F=ma)
                 acceleration = sum_forces / mass
                 
-                if stage.acceleration[0, i - 1] > 0 and stage.acceleration[0, i] < 0:
-                    self.log(f"[{acceleration}] OMG IS THIS APOGEE ??????????????? at time [{stage.time[i]}] ------------------------------!")                       
-                    
-                self.log(f"----------------------------[{acceleration}] at time [{stage.time[i]}] ------------------------------!")                       
-                
                 dt = stage.time[i] - stage.time[i - 1]
+                
+                # apogee time
+                if looking_for_apogee==True and i>10:
+                    prev_alt = stage.get_lla_position_vector()[2, i - 2]
+                    current_alt = stage.get_lla_position_vector()[2, i-1]
+                    if prev_alt > current_alt:
+                        apogee_time = stage.time[i-1]
+                        self.log(f"-----------------------------------Apogee detected at time [{apogee_time}]{prev_alt}]{current_alt}].")
+                        looking_for_apogee = False           
 
                 # propagate forward velocity and position based on current acceleration
                 stage.acceleration[:, i] = np.copy(acceleration)
@@ -247,7 +257,7 @@ class Rocket:
                 # approximate the distance downrange
                 stage.surface_position[:, i] = lla2ecef(latitude, longitude, 0)
                 stage._range[i] = stage._range[i - 1] + \
-                                  np.linalg.norm(stage.surface_position[:, i] - stage.surface_position[:, i - 1])
+                                  np.linalg.norm(stage.surface_position[:, i] - stage.surface_position[:, i - 1])     
 
                 if stage == upper_stage:
                     # copy trajectory data to the connected stages
@@ -334,15 +344,6 @@ class Rocket:
         apogee = np.amax(altitude)
         plt.plot(0, apogee / 1000, 'ro', label=f"Apogee: {apogee/1000:.2f} km")
         plt.xlim(0, np.amax([stage._range[-1] for stage in self.stages]) / 1000)
-        
-        
-        # # plot the apogee
-        # apogee = np.amax(altitude)
-        # plt.xlim(0, apogee)
-        # plt.axhline(y=apogee, color='r', linestyle='-')
-        #     #self.log(f"[{self.name}] Apogee is {apogee / 1000}km")
-        #     # plt.show()
-
         plt.xlabel("Range (km)")
         plt.ylabel("Altitude (km)")
         plt.show()
