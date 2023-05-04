@@ -36,10 +36,10 @@ class Flight_Data:
             
 
     # Define a function to resample the data based on a desired sample time
-    def resample_data(self,csv_file):
+    def resample_data(csv_file, desired_sample_time):
         # Define the output file path for the resampled data
         base_file_name, extension = os.path.splitext(csv_file)
-        resampled_file = base_file_name + f"_resampled_{self.desired_sample_time:.1f}s" + extension
+        resampled_file = base_file_name + f"_resampled_{desired_sample_time:.1f}s" + extension
 
         # Read the CSV file
         with open(csv_file, "r") as f:
@@ -55,7 +55,7 @@ class Flight_Data:
         f = interpolate.interp1d(time, altitude)
 
         # Resample the data using the interpolation function
-        resampled_time = np.arange(time[0], time[-1], self.desired_sample_time)
+        resampled_time = np.arange(time[0], time[-1], desired_sample_time)
         resampled_altitude = f(resampled_time)
 
         # Write the resampled data to a new CSV file
@@ -91,6 +91,8 @@ class Flight_Data:
                 sim_time.append(float(row[0]))
                 sim_altitude.append(float(row[1]))
 
+          
+
         # Create a figure and axis object
         fig, ax = plt.subplots()
 
@@ -106,9 +108,8 @@ class Flight_Data:
         # Show the plot
         plt.show()
 
-    def compare_data(self):
-        resampled_file = self.resample_data()
+    # Resample the data and get the path of the resamWpled file
+    resampled_file = resample_data(file_path, TIME_STEP)
 
-        # Plot the resampled data and simulated data together
-        self.plot_data(resampled_file, self.sim_filepath)
-
+    # Plot the resampled data and simulated data together
+    plot_data(resampled_file, sim_filepath)
