@@ -90,21 +90,46 @@ class Flight_Data:
             for row in reader:
                 sim_time.append(float(row[0]))
                 sim_altitude.append(float(row[1]))
+        
+        # Interpolate the simulated data onto the same time points as the real data
+        f_sim = interpolate.interp1d(sim_time, sim_altitude)
+        sim_altitude_resampled = f_sim(resampled_time)
+
+        # Calculate the error between the resampled data and the simulated data
+        error = np.array(resampled_altitude) - np.array(sim_altitude_resampled)
+
+
+        # Plot data
+        fig, ax = plt.subplots(nrows=2, sharex=True, figsize=(8, 6))
+
+        ax[0].plot(resampled_time, resampled_altitude, label='Real Launch Data')
+        ax[0].plot(sim_time, sim_altitude, label='Simulation')
+        ax[0].set_ylabel("Altitude (m)")
+        ax[0].set_title(f"Resampled Altitude vs. Time (Sample Time = {TIME_STEP} s)")
+        ax[0].legend()
+
+        ax[1].plot(resampled_time, error, color='r')
+        ax[1].set_xlabel("Time (s)")
+        ax[1].set_ylabel("Altitude Error (m)")
+        ax[1].set_title("Altitude Error vs. Time")
+
 
           
 
-        # Create a figure and axis object
-        fig, ax = plt.subplots()
+        # # Create a figure and axis object
+        # fig, ax = plt.subplots()
 
-        # Plot data
-        ax.plot(resampled_time, resampled_altitude, label='Real Launch Data')
-        ax.plot(sim_time, sim_altitude, label='Simulation')
+        # # Plot data
+        # ax.plot(resampled_time, resampled_altitude, label='Real Launch Data')
+        # ax.plot(sim_time, sim_altitude, label='Simulation')
 
-        # Set the axis labels and title
-        ax.set_xlabel("Time (s)")
-        ax.set_ylabel("Altitude (m)")
-        ax.set_title(f"Resampled Altitude vs. Time (Sample Time = {TIME_STEP} s)")
-        ax.legend()
+        # # Set the axis labels and title
+        # ax.set_xlabel("Time (s)")
+        # ax.set_ylabel("Altitude (m)")
+        # ax.set_title(f"Resampled Altitude vs. Time (Sample Time = {TIME_STEP} s)")
+        # ax.legend()
+
+
         # Show the plot
         plt.show()
 
