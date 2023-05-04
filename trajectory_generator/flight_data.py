@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 from scipy import interpolate
-from constants import TIME_STEP
+from trajectory_generator.constants import *
 import os
 
 class Flight_Data:
@@ -15,14 +15,16 @@ class Flight_Data:
 
     # Define the file path to the CSV file
     file_path: str = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv"
+    sim_filepath: str =  "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/lower_stage_altitude_vs_time.csv"
    
     # hex code for KML file styling
     kml_colour: str  
 
-    def __init__(self, name, desired_sample_time, file_path,
+    def __init__(self, name, desired_sample_time, file_path, sim_filepath,
                  kml_colour="ffffffff"):
         self.name = name
         self.file_path = file_path
+        self.sim_filepath = sim_filepath
         self.desired_sample_time = desired_sample_time
         self.kml_colour = kml_colour
 
@@ -34,10 +36,10 @@ class Flight_Data:
             
 
     # Define a function to resample the data based on a desired sample time
-    def resample_data(csv_file, desired_sample_time):
+    def resample_data(self,csv_file):
         # Define the output file path for the resampled data
         base_file_name, extension = os.path.splitext(csv_file)
-        resampled_file = base_file_name + f"_resampled_{desired_sample_time:.1f}s" + extension
+        resampled_file = base_file_name + f"_resampled_{self.desired_sample_time:.1f}s" + extension
 
         # Read the CSV file
         with open(csv_file, "r") as f:
@@ -53,7 +55,7 @@ class Flight_Data:
         f = interpolate.interp1d(time, altitude)
 
         # Resample the data using the interpolation function
-        resampled_time = np.arange(time[0], time[-1], desired_sample_time)
+        resampled_time = np.arange(time[0], time[-1], self.desired_sample_time)
         resampled_altitude = f(resampled_time)
 
         # Write the resampled data to a new CSV file
@@ -67,9 +69,10 @@ class Flight_Data:
         return resampled_file
 
 
-    # Define a function to plot the resampled data
-    def plot_resampled_data(resampled_file, desired_sample_time):
-        # Read the resampled CSV file
+    # Define a function to plot the resampled data and simulation output of altitude plot
+    def plot_data(resampled_file, sim_file):
+
+        # Store data from CSV files
         with open(resampled_file, "r") as f:
             reader = csv.reader(f)
             next(reader) # skip header
@@ -79,22 +82,33 @@ class Flight_Data:
                 resampled_time.append(float(row[0]))
                 resampled_altitude.append(float(row[1]))
 
+        with open(sim_file, "r") as f:
+            reader = csv.reader(f)
+            next(reader) # skip header
+            sim_time = []
+            sim_altitude = []
+            for row in reader:
+                sim_time.append(float(row[0]))
+                sim_altitude.append(float(row[1]))
+
         # Create a figure and axis object
         fig, ax = plt.subplots()
 
-        # Plot the resampled data
-        ax.plot(resampled_time, resampled_altitude)
+        # Plot data
+        ax.plot(resampled_time, resampled_altitude, label='Real Launch Data')
+        ax.plot(sim_time, sim_altitude, label='Simulation')
 
         # Set the axis labels and title
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Altitude (m)")
-        ax.set_title(f"Resampled Altitude vs. Time (Sample Time = {desired_sample_time} s)")
-
+        ax.set_title(f"Resampled Altitude vs. Time (Sample Time = {TIME_STEP} s)")
+        ax.legend()
         # Show the plot
         plt.show()
 
-    # Resample the data and get the path of the resampled file
-    resampled_file = resample_data(file_path, desired_sample_time)
+    def compare_data(self):
+        resampled_file = self.resample_data()
 
-    # Plot the resampled data
-    plot_resampled_data(resampled_file, desired_sample_time)
+        # Plot the resampled data and simulated data together
+        self.plot_data(resampled_file, self.sim_filepath)
+

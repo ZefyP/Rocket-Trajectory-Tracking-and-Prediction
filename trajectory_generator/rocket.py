@@ -11,6 +11,7 @@ from .constants import *
 from time import time
 import matplotlib.pyplot as plt
 import pickle
+import csv
 
 plt.style.use("ggplot")
 
@@ -225,7 +226,7 @@ class Rocket:
                 f_coriolis = np.cross(-2 * mass * omega, v_r)
 
                 # add up forces acting on the rocket
-                sum_forces = drag_vector + gravity_vector + thrust_vector + f_centrifugal + f_coriolis
+                sum_forces = drag_vector + gravity_vector + thrust_vector + f_centrifugal + f_coriolis 
 
                 # determine acceleration (F=ma)
                 acceleration = sum_forces / mass
@@ -332,6 +333,25 @@ class Rocket:
         plt.axhline(y=apogee, color='r', linestyle='-')
         self.log(f"[{self.name}] Apogee is {apogee / 1000}km")
         plt.show()
+
+
+    def generate_csv_altitude_vs_time(self):
+        for stage in self.stages:
+            altitude = stage.get_lla_position_vector()[2, :]
+            time = stage.time
+        # Create time vector based on time step
+        # time = np.arange(0, len(altitude) * TIME_STEP, TIME_STEP)
+
+        # Create CSV file for stage altitude vs time data
+        stage_file = f"{stage.name}_altitude_vs_time.csv"
+        with open(stage_file, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Time", "Altitude"])
+            for i in range(len(time)):
+                writer.writerow([time[i], altitude[i]])
+
+        # Return the path of the CSV file
+        return stage_file
 
     def plot_altitude_range(self):
         for stage in self.stages:
