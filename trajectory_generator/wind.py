@@ -1,6 +1,6 @@
-from .atmosphere import Atmosphere
-from .rocket import Rocket
-from .stage import Stage
+from trajectory_generator.atmosphere import Atmosphere
+from trajectory_generator.rocket import Rocket
+from trajectory_generator.stage import Stage
 
 # class modules
 import numpy as np
@@ -91,16 +91,31 @@ class Wind:
         # samples_20hz = pink_noise[::50]
 
         # Plot white and pink noise
-        fig, ax = plt.subplots(2, 1, figsize=(8, 6))
+        fig, ax = plt.subplots(2, 1, figsize=(8, 8))
         ax[0].plot(white_noise)
+        ax[0].set_xlabel('Time (s)', fontsize = 8)
+        ax[0].set_ylabel('Amplitude')
         ax[0].set_title('White noise')
+
+
         ax[1].plot(pink_noise)
+        ax[1].set_xlabel('Time (s)', fontsize = 8)
+        ax[1].set_ylabel('Amplitude')
         ax[1].set_title('Pink noise')
+
+                
+        for ax in ax:
+            ax.tick_params(labelsize=6) # adjust tick font size
+
 
         # Plot samples at the given frequency
         fig, ax = plt.subplots(1, 1, figsize=(8, 3))
         ax.plot(samples)
+        ax.set_xlabel('Time (s)', fontsize = 8)
+        ax.set_ylabel('Amplitude')
         ax.set_title('Samples at {} Hz'.format(frequency))
 
-        plt.show()
+        ax.tick_params(labelsize=10) # adjust tick font size
 
+        fig.subplots_adjust(hspace=4.5)
+        plt.show()

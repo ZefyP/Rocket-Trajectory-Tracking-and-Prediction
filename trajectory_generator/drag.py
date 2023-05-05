@@ -3,8 +3,11 @@
  This drag function returns the drag coefficient for the given Mach number based on a set of conditional statements. 
  The data is derived from a reference source, Sutton's "Rocket Propulsion Elements", 7th edition, page 108. 
 """
-from .stage import Stage
+from trajectory_generator.stage import Stage
 from typing import List
+
+import csv
+import numpy as np
 
 
 def V2_rocket_drag_function(stages: List[Stage], mach: float) -> float:
@@ -23,3 +26,17 @@ def V2_rocket_drag_function(stages: List[Stage], mach: float) -> float:
         drag_coefficient = 0.15
 
     return drag_coefficient
+
+
+# Define a function to resample the data based on a desired sample time
+def read_csv_col(filepath,column):
+    
+    # Read the CSV file
+    with open(filepath, "r") as f:
+        reader = csv.reader(f)
+        next(reader) # skip header
+        data_column = []
+        for row in reader:
+            data_column.append(float(row[column-1]))
+
+    return np.array(data_column)

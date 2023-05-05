@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from .atmosphere import *
 from .constants import *
 from .utils import *
+from .atmosphere import *
 
 from .drag import *
 

@@ -2,7 +2,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
-from scipy import interpolate
 from trajectory_generator.constants import *
 import os
 from ambiance import Atmosphere
@@ -83,14 +82,14 @@ class Flight_Data:
         # Return the path of the resampled file
         return resampled_file
     
-    def environment_analysis(self):
+    def environment_analysis(altitude):
         """
         takes a list of altitude measured
         """
 
         # determine atmospheric properties
         try:
-            atmosphere = Atmosphere(self.altitude)
+            atmosphere = Atmosphere(altitude)
         except ValueError:
             # we have left the atmosphere
             atmosphere = None
