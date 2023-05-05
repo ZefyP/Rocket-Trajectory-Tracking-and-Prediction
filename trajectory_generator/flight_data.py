@@ -106,7 +106,7 @@ class Flight_Data:
 
         # Calculate the error between the resampled data and the simulated data
         error = resampled_altitude - sim_resampled_altitude
-        percentage_error = abs(error) / (resampled_altitude[:len(sim_resampled_altitude)] * 100
+        percentage_error = abs(error) / resampled_altitude[:len(sim_resampled_altitude)] * 100
 
 
         # Calculate the mean error and max error
