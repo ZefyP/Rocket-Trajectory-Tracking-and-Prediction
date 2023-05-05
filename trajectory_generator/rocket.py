@@ -339,8 +339,10 @@ class Rocket:
         for stage in self.stages:
             altitude = stage.get_lla_position_vector()[2, :]
             time = stage.time
-        # Create time vector based on time step
-        # time = np.arange(0, len(altitude) * TIME_STEP, TIME_STEP)
+        
+        # Round the values to 3 decimal points
+        altitude = np.round(altitude, 3)
+        time = np.round(time, 3)
 
         # Create CSV file for stage altitude vs time data
         stage_file = f"{stage.name}_altitude_vs_time.csv"

@@ -59,17 +59,13 @@ class Flight_Data:
         # Read the CSV file
         time, altitude = self.read_data_csv(filepath)
 
-    #    # Create an interpolation function
-    #     f = interpolate.interp1d(
-    #         time, 
-    #         altitude, 
-    #         bounds_error=False, 
-    #         fill_value=(altitude[0], altitude[-1]),
-    #      )
-
         # Resample the data using the interpolation function
         resampled_time = np.arange(time[0], time[-1], self.desired_sample_time)
+        resampled_time = np.round(resampled_time, 3) # 3 decimal points
+
         resampled_altitude = np.interp(resampled_time, time, altitude)
+        resampled_altitude = np.round(resampled_altitude, 3)
+
         # resampled_time = np.arange(max(time[0], sim_time[0]), min(time[-1], sim_time[-1]), self.desired_sample_time)
         # resampled_altitude = f(resampled_time)
 
@@ -104,9 +100,29 @@ class Flight_Data:
         sim_resampled_altitude = np.resize(sim_resampled_altitude, length)
         sim_resampled_time = np.resize(sim_resampled_time, length)
 
+    
         # Calculate the error between the resampled data and the simulated data
         error = resampled_altitude - sim_resampled_altitude
-        percentage_error = abs(error) / resampled_altitude[:len(sim_resampled_altitude)] * 100
+        #error = np.abs((resampled_altitude - sim_resampled_altitude) / resampled_altitude)
+        error[np.isnan(error)] = 0
+        
+        #percentage_error = abs(error) / (resampled_altitude[:len(sim_resampled_altitude)] + 10) * 100
+        percentage_error = (error / (resampled_altitude)) * 100
+        percentage_error[np.isnan(percentage_error)] = 0
+
+        
+        for i in range(len(error)):
+            perc_error = abs(error[i]) / sim_resampled_altitude[i] * 100
+            if perc_error > 100:
+                print(f"Index: {i}, Altitude Error: {error[i]:.2f}, Percent Error: {perc_error:.2f}%")
+            
+
+
+
+        # compute percentage error
+        # percentage_error = (error / resampled_altitude) * 100
+        # clip percentage error to [-100%, 100%] range
+        # percentage_error = np.clip(percentage_error, -100, 100)
 
 
         # Calculate the mean error and max error
@@ -137,12 +153,9 @@ class Flight_Data:
         # Plot the error between the resampled data and simulated data on the second subplot
         ax[2].plot(resampled_time, percentage_error, label='Percentage Error vs Time')
         ax[2].set_xlabel('Time (s)')
-        ax[2].set_ylabel('Error (m)')
+        ax[2].set_ylabel('Error (%)')
         ax[2].set_title('Percentage Error')
         ax[2].legend()
-
-
-        plt.show()
 
         # Print mean error and max error
         print(f"Mean Error: {mean_error:.2f} m")
