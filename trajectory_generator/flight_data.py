@@ -5,6 +5,7 @@ import csv
 from scipy import interpolate
 from trajectory_generator.constants import *
 import os
+from ambiance import Atmosphere
 
 class Flight_Data:
     
@@ -44,9 +45,11 @@ class Flight_Data:
             next(reader) # skip header
             time = []
             altitude = []
+            pressure =[]
             for row in reader:
                 time.append(float(row[0]))
                 altitude.append(float(row[1]))
+                pressure.append(float(row[2]))
 
         return np.array(time), np.array(altitude)
     
@@ -75,10 +78,30 @@ class Flight_Data:
             writer.writerow(["Time", "Altitude"])
             for i in range(len(resampled_time)):
                 writer.writerow([resampled_time[i], resampled_altitude[i]])
-                print([time[i],altitude[i]],[resampled_time[i], resampled_altitude[i]]) # debug: read the resampled data
+                # print([time[i],altitude[i]],[resampled_time[i], resampled_altitude[i]]) # debug: read the resampled data
 
         # Return the path of the resampled file
         return resampled_file
+    
+    def environment_analysis(self):
+        """
+        takes a list of altitude measured
+        """
+
+        # determine atmospheric properties
+        try:
+            atmosphere = Atmosphere(self.altitude)
+        except ValueError:
+            # we have left the atmosphere
+            atmosphere = None
+
+
+        for row in altitude:
+            atmosphere = Atmosphere(altitude[row])
+            print("your current layer is" + atmosphere._get_layer_nums() )
+         
+            pressure = atmosphere.pressure
+            print("pressure at these altitudes are" + pressure[row])
 
 
     # Define a function to plot the resampled data and simulation output of altitude plot
@@ -109,28 +132,17 @@ class Flight_Data:
         #percentage_error = abs(error) / (resampled_altitude[:len(sim_resampled_altitude)] + 10) * 100
         percentage_error = (error / (resampled_altitude)) * 100
         percentage_error[np.isnan(percentage_error)] = 0
+        
 
         
         for i in range(len(error)):
             perc_error = abs(error[i]) / sim_resampled_altitude[i] * 100
             if perc_error > 100:
                 print(f"Index: {i}, Altitude Error: {error[i]:.2f}, Percent Error: {perc_error:.2f}%")
-            
-
-
-
-        # compute percentage error
-        # percentage_error = (error / resampled_altitude) * 100
-        # clip percentage error to [-100%, 100%] range
-        # percentage_error = np.clip(percentage_error, -100, 100)
-
 
         # Calculate the mean error and max error
         mean_error = np.mean(error)
         max_error = np.max(error)
-
-
-
 
         # Create a figure and axis object
         fig, ax = plt.subplots(1,3)

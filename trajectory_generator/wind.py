@@ -2,6 +2,12 @@ from .atmosphere import Atmosphere
 from .rocket import Rocket
 from .stage import Stage
 
+# class modules
+import numpy as np
+import scipy.signal as signal
+import matplotlib.pyplot as plt
+
+
 class Wind:
     def __init__(self, altitude):
         self.atmosphere = Atmosphere(altitude)
@@ -57,4 +63,5 @@ class Wind:
         v_list.append(Rocket.velocity)
         pos_list.append(Rocket.position)
         return drift
+    
 
