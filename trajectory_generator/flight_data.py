@@ -36,13 +36,10 @@ class Flight_Data:
             
 
     # Define a function to resample the data based on a desired sample time
-    def resample_data(self):
-        # Define the output file path for the resampled data
-        base_file_name, extension = os.path.splitext(self.file_path)
-        resampled_file = base_file_name + f"_resampled_{self.desired_sample_time:.1f}s" + extension
-
+    def read_data_csv(self,filepath):
+        
         # Read the CSV file
-        with open(self.file_path, "r") as f:
+        with open(filepath, "r") as f:
             reader = csv.reader(f)
             next(reader) # skip header
             time = []
@@ -51,18 +48,30 @@ class Flight_Data:
                 time.append(float(row[0]))
                 altitude.append(float(row[1]))
 
-       # Create an interpolation function
-        f = interpolate.interp1d(
-            time, 
-            altitude, 
-            bounds_error=False, 
-            fill_value=(altitude[0], altitude[-1]),
-         )
+        return np.array(time), np.array(altitude)
+    
+    def resample_data(self,filepath):
 
+        # Define the output file path for the resampled data
+        base_file_name, extension = os.path.splitext(filepath)
+        resampled_file = base_file_name + f"_resampled_{self.desired_sample_time:.1f}s" + extension
+
+        # Read the CSV file
+        time, altitude = self.read_data_csv(filepath)
+
+    #    # Create an interpolation function
+    #     f = interpolate.interp1d(
+    #         time, 
+    #         altitude, 
+    #         bounds_error=False, 
+    #         fill_value=(altitude[0], altitude[-1]),
+    #      )
 
         # Resample the data using the interpolation function
         resampled_time = np.arange(time[0], time[-1], self.desired_sample_time)
-        resampled_altitude = f(resampled_time)
+        resampled_altitude = np.interp(resampled_time, time, altitude)
+        # resampled_time = np.arange(max(time[0], sim_time[0]), min(time[-1], sim_time[-1]), self.desired_sample_time)
+        # resampled_altitude = f(resampled_time)
 
         # Write the resampled data to a new CSV file
         with open(resampled_file, "w", newline="") as f:
@@ -70,6 +79,7 @@ class Flight_Data:
             writer.writerow(["Time", "Altitude"])
             for i in range(len(resampled_time)):
                 writer.writerow([resampled_time[i], resampled_altitude[i]])
+                print([time[i],altitude[i]],[resampled_time[i], resampled_altitude[i]]) # debug: read the resampled data
 
         # Return the path of the resampled file
         return resampled_file
@@ -79,69 +89,113 @@ class Flight_Data:
     def plot_data(self):
 
         # Resample the real data
-        resampled_file = self.resample_data()
-        sim_file = self.resample_data()
+        resampled_file = self.resample_data(self.file_path)
+        sim_file = self.resample_data(self.sim_filepath)
+        # read
+        resampled_time, resampled_altitude = self.read_data_csv(resampled_file)
+        sim_resampled_time, sim_resampled_altitude = self.read_data_csv(sim_file)
+
+
+        # Resize the arrays to have the same length
+        length = min(len(resampled_altitude), len(sim_resampled_altitude))
+        resampled_altitude = np.resize(resampled_altitude, length)
+        resampled_time = np.resize(resampled_time, length)
         
-        # Store data from CSV files
-        with open(resampled_file, "r") as f:
-            reader = csv.reader(f)
-            next(reader) # skip header
-            resampled_time = []
-            resampled_altitude = []
-            for row in reader:
-                resampled_time.append(float(row[0]))
-                resampled_altitude.append(float(row[1]))
-
-        with open(sim_file, "r") as f:
-            reader = csv.reader(f)
-            next(reader) # skip header
-            sim_time = []
-            sim_altitude = []
-            for row in reader:
-                sim_time.append(float(row[0]))
-                sim_altitude.append(float(row[1]))
-
-
-        # Check that resampled_time is within the range of sim_time
-        if resampled_time[0] < sim_time[0] or resampled_time[-1] > sim_time[-1]:
-            raise ValueError("Resampled real data time is outside the range of simulated time")
-
-        
-        # Interpolate the simulated data onto the same time points as the real data
-        f_sim = interpolate.interp1d(sim_time, sim_altitude)
-        #sim_altitude_resampled = f_sim(resampled_time)
+        sim_resampled_altitude = np.resize(sim_resampled_altitude, length)
+        sim_resampled_time = np.resize(sim_resampled_time, length)
 
         # Calculate the error between the resampled data and the simulated data
-        error = np.array(resampled_altitude) - np.array(sim_altitude)
-            
+        error = resampled_altitude - sim_resampled_altitude
+        percentage_error = abs(error) / (resampled_altitude[:len(sim_resampled_altitude)] * 100
+
+
         # Calculate the mean error and max error
         mean_error = np.mean(error)
         max_error = np.max(error)
 
-         # Create a figure and axis object
-        fig, ax = plt.subplots(2,2)
+
+
+
+        # Create a figure and axis object
+        fig, ax = plt.subplots(1,3)
 
         # Plot the resampled data and simulation output on the first subplot
-        ax[0,0].plot(resampled_time, sim_altitude, label='Resampled Data')
-        ax[0,0].plot(sim_time, sim_altitude, label='Simulation Output')
-        ax[0,0].set_xlabel('Time (s)')
-        ax[0,0].set_ylabel('Altitude (m)')
-        ax[0,0].set_title('Altitude vs Time')
-        ax[0,0].legend()
-
+        ax[0].plot(resampled_time, resampled_altitude, label='Real Data')
+        ax[0].plot(sim_resampled_time, sim_resampled_altitude, label='Simulation Output')
+        ax[0].set_xlabel('Time (s)')
+        ax[0].set_ylabel('Altitude (m)')
+        ax[0].set_title('Altitude vs Time')
+        ax[0].legend()
 
         # Plot the error between the resampled data and simulated data on the second subplot
-        ax[0,1].plot(resampled_time, error, label='Error vs Time')
-        ax[0,1].set_xlabel('Time (s)')
-        ax[0,1].set_ylabel('Error (m)')
-        ax[0,1].set_title('Error vs Time')
-        ax[0,1].legend()
+        ax[1].plot(resampled_time, error, label='Altitude Error vs Time')
+        ax[1].set_xlabel('Time (s)')
+        ax[1].set_ylabel('Error (m)')
+        ax[1].set_title('Error vs Time')
+        ax[1].legend()
+
+        # Plot the error between the resampled data and simulated data on the second subplot
+        ax[2].plot(resampled_time, percentage_error, label='Percentage Error vs Time')
+        ax[2].set_xlabel('Time (s)')
+        ax[2].set_ylabel('Error (m)')
+        ax[2].set_title('Percentage Error')
+        ax[2].legend()
+
+
+        plt.show()
 
         # Print mean error and max error
         print(f"Mean Error: {mean_error:.2f} m")
         print(f"Max Error: {max_error:.2f} m")
 
+        # # Show the plot
+        plt.show()
 
+
+
+
+
+
+
+        
+        # # Store data from CSV files
+        # with open(resampled_file, "r") as f:
+        #     reader = csv.reader(f)
+        #     next(reader) # skip header
+        #     resampled_time = []
+        #     resampled_altitude = []
+        #     for row in reader:
+        #         resampled_time.append(float(row[0]))
+        #         resampled_altitude.append(float(row[1]))
+
+        # with open(sim_file, "r") as f:
+        #     reader = csv.reader(f)
+        #     next(reader) # skip header
+        #     sim_time = []
+        #     sim_altitude = []
+        #     for row in reader:
+        #         sim_time.append(float(row[0]))
+        #         sim_altitude.append(float(row[1]))
+
+
+        # Check that resampled_time is within the range of sim_time
+        # if resampled_time[0] < sim_time[0] or resampled_time[-1] > sim_time[-1]:
+        #     raise ValueError("Resampled real data time is outside the range of simulated time")
+        
+        # # Interpolate the simulated data onto the same time points as the real data
+        # f_sim = interpolate.interp1d(sim_time, sim_altitude)
+        # sim_altitude_resampled = f_sim(sim_time)
+
+        # Calculate the error between the resampled data and the simulated data
+        # new_resampled_time = np.linspace(resampled_time[0], resampled_time[-1], len(sim_time))
+        # error = np.array(resampled_altitude) - np.array(f_sim(new_resampled_time))
+        # print(resampled_altitude, "   ", sim_altitude, "            ", error)
+
+        
+
+
+
+        
         # # Create a figure and axis object
         # fig, ax2 = plt.subplots()
 
@@ -160,9 +214,3 @@ class Flight_Data:
         # ax2.set_xlabel("Time (s)")
         # ax2.set_ylabel("Altitude Error (m)")
         # ax2.legend()
-
-
-        # # Show the plot
-        plt.show()
-
-    
