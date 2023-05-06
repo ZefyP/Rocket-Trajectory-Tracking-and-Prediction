@@ -80,7 +80,7 @@ class Stage:
 
     def __init__(self, name, dry_mass, fuel_mass, thrust, burn_time,
                  specific_impulse=None, separation_time=0,
-                 diameter=None, cross_sectional_area=None,
+                 diameter=None, length=1,cross_sectional_area=None,
                  kml_colour="ffffffff"):
         self.name = name
         self.dry_mass = dry_mass

@@ -8,6 +8,7 @@ from typing import List
 
 import csv
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def V2_rocket_drag_function(stages: List[Stage], mach: float) -> float:
@@ -30,13 +31,50 @@ def V2_rocket_drag_function(stages: List[Stage], mach: float) -> float:
 
 # Define a function to resample the data based on a desired sample time
 def read_csv_col(filepath,column):
+    column = column.astype(np.float)# convert column to int
+
     
     # Read the CSV file
     with open(filepath, "r") as f:
         reader = csv.reader(f)
-        next(reader) # skip header
+        # Skip the first 6 rows
+        for _ in range(6):
+            next(reader)
+
         data_column = []
         for row in reader:
-            data_column.append(float(row[column-1]))
+            print(([column]))
+            if row[column]:
+                data_column.append(float(row[column])) # OpenRocket standard export
 
+    
     return np.array(data_column)
+
+
+def plot_csv_cols(filepath, col_x, col_y):
+    """
+    Takes desired columns of file and plots them.
+    """
+    x = []
+    y = []
+    x = read_csv_col(filepath, col_x)
+    y = read_csv_col(filepath, col_y)
+
+    # Plot samples at the given frequency
+    fig, ax = plt.subplots(1, 1, figsize=(8, 3))
+
+    ax.plot(x,y)
+    #ax.set_xlabel('{}'.format(x), fontsize = 8)
+    #ax.set_ylabel('{}'.format(y), fontsize = 8)
+    #ax.set_title('{}} vs {}'.format(x,y))
+
+    plt.show()
+
+
+def get_cd_mach(filepath):
+
+    mach = read_csv_col(filepath,25)
+    cd = read_csv_col(filepath,29)
+
+    plot_csv_cols(filepath,mach,cd)
+    

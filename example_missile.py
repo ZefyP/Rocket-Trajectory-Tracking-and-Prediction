@@ -6,7 +6,7 @@ lower_stage = Stage(
     name="Lower stage",
     dry_mass=1000,
     fuel_mass=5000,
-    thrust=300e3,
+    thrust=300e9,
     burn_time=10,
     separation_time=1,
     diameter=0.5,
@@ -43,7 +43,7 @@ hebrides = Launcher(
 missile = Rocket("Example Rocket", "BAE Systems", hebrides)
 missile.stages = [lower_stage, upper_stage, another_stage]
 missile.run_simulation()
-#missile.plot_all()
+missile.plot_all()
 #missile.plot_accel()
 
 for stage in missile.stages:

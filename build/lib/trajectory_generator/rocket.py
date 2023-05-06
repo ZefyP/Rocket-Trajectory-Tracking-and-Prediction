@@ -11,6 +11,7 @@ from .constants import *
 from time import time
 import matplotlib.pyplot as plt
 import pickle
+import csv
 
 plt.style.use("ggplot")
 
@@ -63,6 +64,9 @@ class Rocket:
         self.logging_enabled = True
 
     def run_simulation(self):
+        # set single use flag
+        looking_for_apogee = True
+        apogee_time = None
         # set initial position and velocity of each stage
         for stage in self.stages:
             stage.position[:, 0] = self.launcher.position_ECEF
@@ -94,7 +98,10 @@ class Rocket:
                     self.log(f"[{stage.name}] range is {round(stage._range[-1] / 1e3, 1)} km")
                     altitude = stage.get_lla_position_vector()[2, :]
                     apogee = np.amax(altitude)
-                    self.log(f"[{stage.name}] apogee is {round(apogee / 1000, 1)} km")
+                    print(len(stage.time))
+                    
+                    self.log(f"[{stage.name}] apogee is {round(apogee / 1000, 1)} km at {stage.time[-1]} seconds")
+                    
                 break
 
             # 'start the motor' if not started yet  
@@ -206,7 +213,7 @@ class Rocket:
                     else:
                         drag_direction = 0
                     drag_vector = 1 / 2 * atmosphere.density * A * Cd * velocity_magnitude ** 2 * drag_direction
-                    self.log(f"[{self.name}] [{stage.time[i]}] DRAG {active_stage.name} with vector  {drag_vector} ") # ---------------
+                    # self.log(f"[{self.name}] [{stage.time[i]}] DRAG {active_stage.name} with vector  {drag_vector} ") # ---------------
 
                 # calculate centrifugal force
 
@@ -219,12 +226,21 @@ class Rocket:
                 f_coriolis = np.cross(-2 * mass * omega, v_r)
 
                 # add up forces acting on the rocket
-                sum_forces = drag_vector + gravity_vector + thrust_vector + f_centrifugal + f_coriolis
+                sum_forces = drag_vector + gravity_vector + thrust_vector + f_centrifugal + f_coriolis 
 
                 # determine acceleration (F=ma)
                 acceleration = sum_forces / mass
-
+                
                 dt = stage.time[i] - stage.time[i - 1]
+                
+                # apogee time
+                if looking_for_apogee==True and i>10:
+                    prev_alt = stage.get_lla_position_vector()[2, i - 2]
+                    current_alt = stage.get_lla_position_vector()[2, i-1]
+                    if prev_alt > current_alt:
+                        apogee_time = stage.time[i-1]
+                        self.log(f"-----------------------------------Apogee detected at time [{apogee_time}]{prev_alt}]{current_alt}].")
+                        looking_for_apogee = False           
 
                 # propagate forward velocity and position based on current acceleration
                 stage.acceleration[:, i] = np.copy(acceleration)
@@ -242,7 +258,7 @@ class Rocket:
                 # approximate the distance downrange
                 stage.surface_position[:, i] = lla2ecef(latitude, longitude, 0)
                 stage._range[i] = stage._range[i - 1] + \
-                                  np.linalg.norm(stage.surface_position[:, i] - stage.surface_position[:, i - 1])
+                                  np.linalg.norm(stage.surface_position[:, i] - stage.surface_position[:, i - 1])     
 
                 if stage == upper_stage:
                     # copy trajectory data to the connected stages
@@ -313,9 +329,29 @@ class Rocket:
         plt.ylabel("Altitude (metres)")
 
         apogee = np.amax(altitude)
+        
         plt.axhline(y=apogee, color='r', linestyle='-')
         self.log(f"[{self.name}] Apogee is {apogee / 1000}km")
         plt.show()
+
+
+    def generate_csv_altitude_vs_time(self):
+        for stage in self.stages:
+            altitude = stage.get_lla_position_vector()[2, :]
+            time = stage.time
+        # Create time vector based on time step
+        # time = np.arange(0, len(altitude) * TIME_STEP, TIME_STEP)
+
+        # Create CSV file for stage altitude vs time data
+        stage_file = f"{stage.name}_altitude_vs_time.csv"
+        with open(stage_file, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Time", "Altitude"])
+            for i in range(len(time)):
+                writer.writerow([time[i], altitude[i]])
+
+        # Return the path of the CSV file
+        return stage_file
 
     def plot_altitude_range(self):
         for stage in self.stages:
@@ -328,15 +364,6 @@ class Rocket:
         apogee = np.amax(altitude)
         plt.plot(0, apogee / 1000, 'ro', label=f"Apogee: {apogee/1000:.2f} km")
         plt.xlim(0, np.amax([stage._range[-1] for stage in self.stages]) / 1000)
-        
-        
-        # # plot the apogee
-        # apogee = np.amax(altitude)
-        # plt.xlim(0, apogee)
-        # plt.axhline(y=apogee, color='r', linestyle='-')
-        #     #self.log(f"[{self.name}] Apogee is {apogee / 1000}km")
-        #     # plt.show()
-
         plt.xlabel("Range (km)")
         plt.ylabel("Altitude (km)")
         plt.show()
@@ -361,6 +388,15 @@ class Rocket:
         plt.legend()
         plt.xlabel("Time (seconds)")
         plt.ylabel("Fuel Mass (kg)")
+        plt.show()
+
+    def plot_accel(self):
+        for stage in self.stages:
+            accel = np.linalg.norm(stage.acceleration[0,:], axis=0)
+            plt.plot(stage.time, accel, label=stage.name)
+        plt.legend()
+        plt.xlabel("Time (seconds)")
+        plt.ylabel("Accelleration (m/s^2)")
         plt.show()
 
     def plot_speed(self):

@@ -1,23 +1,11 @@
-from atmosphere import Atmosphere
-from rocket import Rocket
-from stage import Stage
+from .atmosphere import Atmosphere
+from .rocket import Rocket
+from .stage import Stage
 
 class Wind:
     def __init__(self, altitude):
         self.atmosphere = Atmosphere(altitude)
-        self.layer = self.get_layer()
-
-    def get_layer(self):
-        if self.atmosphere.altitude_geometric <= 11000:             # m
-            return 'troposphere'
-        elif 11000 < self.atmosphere.altitude_geometric <= 25000:
-            return 'lower_stratosphere'
-        elif 25000 < self.atmosphere.altitude_geometric <= 40000:
-            return 'upper_stratosphere'
-        elif 40000 < self.atmosphere.altitude_geometric <= 80000:
-            return 'mesosphere'
-        else:
-            return 'thermosphere'
+        self.layer = Atmosphere._get_layer_nums()
 
     def get_wind_speed(self):
         if self.layer == 'troposphere':
@@ -62,11 +50,11 @@ class Wind:
         drag_force_z = drag_force_vector[2] + drag_force_side_vector[2]
 
         # Update rocket position and velocity using rocket equation
-        missile.update(dt, drag_force_x, drag_force_y, drag_force_z)
+        Rocket.update(dt, drag_force_x, drag_force_y, drag_force_z)
 
         # Store simulation results
         t_list.append(t*dt)
-        v_list.append(missile.velocity)
-        pos_list.append(missile.position)
+        v_list.append(Rocket.velocity)
+        pos_list.append(Rocket.position)
         return drift
 
