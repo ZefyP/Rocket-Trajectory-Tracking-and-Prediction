@@ -2,3 +2,4 @@ numpy
 scipy
 simplekml
 matplotlib
+ambiance

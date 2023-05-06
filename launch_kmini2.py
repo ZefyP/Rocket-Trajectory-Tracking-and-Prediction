@@ -9,13 +9,10 @@ import os
 flight_data = Flight_Data(
     name = "KarmanMini2 Relaunch Data",
     desired_sample_time = TIME_STEP,
-    real_data_path = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv",
-    sim_filepath ="C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/trajectory_generator/lower_stage_altitude_vs_time.csv",
-    OR_data_filepath = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/OR_karmanmini2.csv"
+    real_data_path = "Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv",
+    sim_filepath ="Rocket-Trajectory-Tracking-and-Prediction/trajectory_generator/lower_stage_altitude_vs_time.csv",
+    OR_data_filepath = "Rocket-Trajectory-Tracking-and-Prediction/example/OR_karmanmini2.csv"
 )
-
-
-
 
 kmini2_L = Stage(
     name="lower_stage",
