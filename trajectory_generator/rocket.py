@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import pickle
 import csv
 
+from .flight_data import Flight_Data
+
 plt.style.use("ggplot")
 
 
@@ -51,13 +53,27 @@ class Rocket:
     launcher: Launcher
 
     def __init__(self, name: str, country: str, launcher: Launcher,
+                 use_cd_file: bool = False,
+                 flight_data: Flight_Data = None, # allow an instance of this class as an argument
                  drag_function: Callable[[List[Stage], float], float] = V2_rocket_drag_function,
                  thrust_function: Callable[[List[Stage], int], np.ndarray] = None):
         self.name = name
         self.country = country
         self.launcher = launcher
 
-        self.drag_function = drag_function
+        use_cd_file = use_cd_file
+        self.flight_data = flight_data
+
+        if use_cd_file:
+            if flight_data is None:
+                raise ValueError("If 'use_cd_file' is True, 'flight_data' must be provided. Check that the fetching and storing of CD from the external file is done correctly.")
+            
+            self.drag_function = self.flight_data.fetch_cd() # use the function to read data from file and fetch the Cd values
+            print("--------------------------------I USED THE CD FILE !!!!!!!!!!!")
+        else:
+            self.drag_function = V2_rocket_drag_function
+            print("--------------------------------I USED THE V2 FUNCTION~~~~~~~~")
+
         self.thrust_function = thrust_function
 
         # Set this to False to silence solver output

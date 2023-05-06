@@ -24,7 +24,8 @@ class Flight_Data:
     kml_colour: str 
 
 
-    def __init__(self, name, desired_sample_time, real_data_path, sim_filepath, OR_data_filepath,
+    def __init__(self, name, desired_sample_time, 
+                 real_data_path, sim_filepath, OR_data_filepath,
                  kml_colour="ffffffff"):
         self.name = name
         self.desired_sample_time = desired_sample_time
@@ -182,8 +183,23 @@ class Flight_Data:
     """
     Manipulating OPENROCKET simulated data to improve the simulations : 
     """
-            
     
+    def replace_nan(self,array, replace_with=0):
+        """
+        Replaces all NaN values in a 1D numpy array with a specified value.
+
+        Parameters:
+        array (numpy.ndarray): The 1D numpy array to modify.
+        replace_with (float): The value to replace NaN values with. Defaults to 0.
+
+        Returns:
+        numpy.ndarray: The modified numpy array.
+        """
+        mask = np.isnan(array)
+        array[mask] = replace_with
+        return np.nan_to_num(array, nan = replace_with)
+
+
     # This is tailored to OPEN ROCKET FILES 
     def read_OR_csv_col(self, OR_data_filepath,column):
         # Define a function to resample the data based on a desired sample time
@@ -231,6 +247,16 @@ class Flight_Data:
         ax.set_ylabel('{}'.format(y_header), fontsize = 10)
         ax.set_title('{} vs {}'.format(x_header,y_header), fontsize = 12)
         plt.show()
+
+
+    def fetch_cd(self):
+        cd, _ = self.read_OR_csv_col(self.OR_data_filepath,29) # ignore the column header
+        cd = self.replace_nan(cd, replace_with= 0) # this will replace all nan in the array with 0
+        
+        print("--------------------------------I am in fetch_cd !!!!!!!!!")
+        print(cd)
+        return cd
+
 
     def get_mach_cd(self):
         #mach = read_OR_csv_col(filepath,25)

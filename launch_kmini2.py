@@ -5,6 +5,17 @@ from trajectory_generator import Flight_Data, Wind, drag
 from trajectory_generator.constants import TIME_STEP
 
 import os
+
+flight_data = Flight_Data(
+    name = "KarmanMini2 Relaunch Data",
+    desired_sample_time = TIME_STEP,
+    real_data_path = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv",
+    sim_filepath ="C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/trajectory_generator/lower_stage_altitude_vs_time.csv",
+    OR_data_filepath = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/OR_karmanmini2.csv"
+)
+
+
+
 kmini2_L = Stage(
     name="lower_stage",
     dry_mass= 0.577,            # kg
@@ -33,32 +44,24 @@ launch_site = Launcher(
     azimuth=0, # pointing to true north
     elevation=85 # pointing nearly to zenith
 )
-
-flight_data = Flight_Data(
-    name = "KarmanMini2 Relaunch Data",
-    desired_sample_time = TIME_STEP,
-    real_data_path = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv",
-    sim_filepath ="C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/trajectory_generator/lower_stage_altitude_vs_time.csv",
-    OR_data_filepath = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/OR_karmanmini2.csv"
-)
-
-missile = Rocket("KMini2", "Sunride", launch_site)
+missile = Rocket("KMini2", "Sunride", launch_site, use_cd_file = True, flight_data = flight_data)
 missile.stages = [kmini2_L]
 
-#missile.run_simulation()
+missile.run_simulation()
 
 # Save the simulated altitude and compate with real data 
-#missile.generate_csv_altitude_vs_time()
+missile.generate_csv_altitude_vs_time()
+missile.plot_altitude_range()
 
 # Wind.simulate_turbulence(20)
-flight_data.get_mach_cd()
-flight_data.get_time_accel_z()
+# flight_data.get_mach_cd()
+# flight_data.get_time_accel_z()
 
 # flight_data.plot_data()
 # flight_data.environment_analysis()
 
 
-# missile.plot_altitude_range()
+
 #missile.plot_all()
 #missile.plot_accel()
 #missile.generate_csv_altitude_vs_time()
