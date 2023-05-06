@@ -22,7 +22,7 @@ kmini2_L = Stage(
     burn_time=1.01,             # s
     diameter=0.0411,            # m
     length = 0.848,             # m
-    separation_time= 1, # s
+    separation_time= 1,         # s
     kml_colour="ffffff00"
 )
 
@@ -38,18 +38,18 @@ kmini2_U = Stage(
 
 launch_site = Launcher(
     "Midlands Rocketry Club, United Kingdom",
-    latitude= 52.668250, longitude= -1.524632, altitude = 10,
-    azimuth=0, # pointing to true north
-    elevation=85 # pointing nearly to zenith
+    latitude = 52.668250, longitude= -1.524632, altitude = 10,
+    azimuth = 0,      # pointing to true north
+    elevation = 85    # pointing nearly to zenith
 )
 
-missile = Rocket("KMini2", "Sunride", launch_site, use_cd_file = True)
-missile.stages = [kmini2_L]
-missile.run_simulation()
+rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = True, flight_data = flight_data)
+rocket.stages = [kmini2_L]
+rocket.run_simulation()
 
 # Save the simulated altitude and compate with real data 
-missile.generate_csv_altitude_vs_time()
-missile.plot_altitude_range()
+rocket.generate_csv_altitude_vs_time()
+rocket.plot_altitude_range()
 
 # Wind.simulate_turbulence(20)
 flight_data.plot_mach_cd()
@@ -60,18 +60,16 @@ flight_data.plot_mach_cd()
 
 
 
-#missile.plot_all()
-#missile.plot_accel()
-#missile.generate_csv_altitude_vs_time()
-# flight_data.compare("C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv",
-#     "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/lower_stage_altitude_vs_time.csv"  
-# )
+#rocket.plot_all()
+#rocket.plot_accel()
+#rocket.generate_csv_altitude_vs_time()
+# flight_data.compare("C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv")
 
-for stage in missile.stages:
+for stage in rocket.stages:
     output_dir = 'output'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     stage.export_KML(
-        f"output/{missile.name}_{stage.name}.kml",
+        f"output/{rocket.name}_{stage.name}.kml",
         downsample_factor=10,
     )

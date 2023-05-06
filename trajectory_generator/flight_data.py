@@ -253,16 +253,16 @@ class Flight_Data:
         cd, _ = self.read_OR_csv_col(self.OR_data_filepath,29) # ignore the column header
         cd = self.replace_nan(cd, replace_with= 0) # this will replace all nan in the array with 0
         
-        print("--------------------------------I am in fetch_cd !!!!!!!!!")
-        print(cd)
+        # print("--------------------------------I am in fetch_cd !!!!!!!!!")
+        # print(cd) # DEBUG
         return cd
 
     def fetch_mach(self):
         mach, _ = self.read_OR_csv_col(self.OR_data_filepath,25) # ignore the column header
         mach = self.replace_nan(mach, replace_with= 0) # this will replace all nan in the array with 0
         
-        print("--------------------------------I am in fetch_mach !!!!!!!!!")
-        print(mach)
+        # print("--------------------------------I am in fetch_mach !!!!!!!!!")
+        # print(mach) # DEBUG
         return mach
 
     def plot_mach_cd(self):

@@ -52,15 +52,19 @@ class Rocket:
    
     launcher: Launcher
 
-    def __init__(self, name: str, country: str, launcher: Launcher,
+    def __init__(self, name: str, 
+                 country: str, 
+                 launcher: Launcher,
                  use_cd_file: bool = False,
-                 # flight_data: Flight_Data = None, # allow an instance of this class as an argument
+                 flight_data: Flight_Data = None, # allow an instance of this class as an argument
                  drag_function: Callable[[List[Stage], float], float] = V2_rocket_drag_function,
                  thrust_function: Callable[[List[Stage], int], np.ndarray] = None):
+        
         self.name = name
         self.country = country
         self.launcher = launcher
-
+        
+        self.flight_data = flight_data
         self.use_cd_file = use_cd_file
         self.drag_function = drag_function
         self.thrust_function = thrust_function
@@ -68,23 +72,11 @@ class Rocket:
         self.logging_enabled = True
 
         if use_cd_file:
-            drag_function = fetch_cd_function
-            print("--------------------------------I USED THE CD FILE !!!!!!!!!!!")
+            self.drag_function = fetch_cd_function
+            print("--------------------------------I USED THE CD FILE !!!")
         else:
-            drag_function = V2_rocket_drag_function
-            print("--------------------------------I USED THE V2 FUNCTION~~~~~~~~")
-
-
-    # def calculate_drag(self):
-
-    #     if self.use_cd_file:
-    #         if self.flight_data is None:
-    #             raise ValueError("If 'use_cd_file' is True, 'flight_data' must be provided. Check that the fetching and storing of CD from the external file is done correctly.")
-    #             cd = fetch_cd_function()# use the function to read data from file and fetch the Cd values
-    #     else:
-    #             cd = V2_rocket_drag_function()
-    #     return cd
-
+            self.drag_function = V2_rocket_drag_function
+            print("--------------------------------I USED THE V2_ROCKET FUNCTION !!!")
 
 
     def run_simulation(self):
@@ -122,9 +114,9 @@ class Rocket:
                     self.log(f"[{stage.name}] range is {round(stage._range[-1] / 1e3, 1)} km")
                     altitude = stage.get_lla_position_vector()[2, :]
                     apogee = np.amax(altitude)
-                    print(len(stage.time))
+                    # print(len(stage.time)) # DEBUG
                     
-                    self.log(f"[{stage.name}] apogee is {round(apogee / 1000, 1)} km at {stage.time[-1]} seconds")
+                    self.log(f"[{stage.name}] Apogee is {round(apogee, 1)} m at {stage.time[-1]} seconds")
                     
                 break
 
@@ -224,7 +216,7 @@ class Rocket:
                 if mach_number is None:
                     Cd = 0
                 else:
-                    Cd = self.drag_function(stages_to_consider, mach_number)
+                    Cd = self.drag_function(stages_to_consider, mach_number, self.flight_data)
                 A = max([_stage.cross_sectional_area for _stage in stages_to_consider])
                 if Cd == 0:
                     # coefficient of drag = 0 corresponds to no drag
@@ -263,7 +255,7 @@ class Rocket:
                     current_alt = stage.get_lla_position_vector()[2, i-1]
                     if prev_alt > current_alt:
                         apogee_time = stage.time[i-1]
-                        self.log(f"-----------------------------------Apogee detected at time [{apogee_time}]{prev_alt}]{current_alt}].")
+                        # self.log(f"-----------------------------------Apogee detected at time [{apogee_time}]{prev_alt}]{current_alt}].") # DEBUG
                         looking_for_apogee = False           
 
                 # propagate forward velocity and position based on current acceleration
