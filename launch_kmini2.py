@@ -17,7 +17,6 @@ kmini2_L = Stage(
     kml_colour="ffffff00"
 )
 
- 
 kmini2_U = Stage(
     name="upper_stage",
     dry_mass= 0.577,            # kg
@@ -43,14 +42,15 @@ flight_data = Flight_Data(
 )
 
 # Wind.simulate_turbulence(20)
-cd_filepath = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/OR_karmanmini2.csv"
-drag.get_cd_mach(cd_filepath)
+OR_data_filepath = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/OR_karmanmini2.csv"
+drag.get_mach_cd(OR_data_filepath)
+drag.get_time_accel_z(OR_data_filepath)
 
 
 missile = Rocket("KMini2", "Sunride", launch_site)
 missile.stages = [kmini2_L]
 
-# missile.run_simulation()
+#missile.run_simulation()
 
 # Save the simulated altitude and compate with real data 
 #missile.generate_csv_altitude_vs_time()
@@ -66,9 +66,6 @@ missile.stages = [kmini2_L]
 # flight_data.compare("C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv",
 #     "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/lower_stage_altitude_vs_time.csv"  
 # )
-
-
-
 
 for stage in missile.stages:
     output_dir = 'output'

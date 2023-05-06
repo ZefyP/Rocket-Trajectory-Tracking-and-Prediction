@@ -25,30 +25,39 @@ def V2_rocket_drag_function(stages: List[Stage], mach: float) -> float:
         drag_coefficient = 0.625 * mach - 0.35
     elif mach <= 0.8:
         drag_coefficient = 0.15
+        # drag_coefficient = 0.52 # karman mini 2
 
     return drag_coefficient
 
 
 # Define a function to resample the data based on a desired sample time
-def read_csv_col(filepath,column):
-    column = column.astype(np.float)# convert column to int
+# This is tailored to OPEN ROCKET FILES 
+def read_OR_csv_col(filepath,column):
+    #column = int[column]# convert column to int
 
     
     # Read the CSV file
     with open(filepath, "r") as f:
         reader = csv.reader(f)
-        # Skip the first 6 rows
-        for _ in range(6):
+        # Skip 2 rows
+        for _ in range(2):
             next(reader)
 
+        # Save the column header
+        col_header = next(reader)[column]
+        
         data_column = []
-        for row in reader:
-            print(([column]))
-            if row[column]:
-                data_column.append(float(row[column])) # OpenRocket standard export
 
-    
-    return np.array(data_column)
+ # Save the data and skip empty and non-numerical cells
+        for row in reader:
+            # print(([column])) # DEBUG
+            try:
+                cell = float(row[column])
+            except ValueError:
+                    continue
+            data_column.append(cell) # OpenRocket standard export
+
+    return ( np.array(data_column), col_header )
 
 
 def plot_csv_cols(filepath, col_x, col_y):
@@ -57,24 +66,26 @@ def plot_csv_cols(filepath, col_x, col_y):
     """
     x = []
     y = []
-    x = read_csv_col(filepath, col_x)
-    y = read_csv_col(filepath, col_y)
+    x , x_header = read_OR_csv_col(filepath, col_x)
+    y , y_header = read_OR_csv_col(filepath, col_y)
+    print(x_header , y_header)
+
 
     # Plot samples at the given frequency
     fig, ax = plt.subplots(1, 1, figsize=(8, 3))
 
     ax.plot(x,y)
-    #ax.set_xlabel('{}'.format(x), fontsize = 8)
-    #ax.set_ylabel('{}'.format(y), fontsize = 8)
-    #ax.set_title('{}} vs {}'.format(x,y))
-
+    ax.set_xlabel('{}'.format(x_header), fontsize = 10)
+    ax.set_ylabel('{}'.format(y_header), fontsize = 10)
+    ax.set_title('{} vs {}'.format(x_header,y_header), fontsize = 12)
     plt.show()
 
+def get_mach_cd(filepath):
+    #mach = read_OR_csv_col(filepath,25)
+    #cd = read_OR_csv_col(filepath,29)
+    plot_csv_cols(filepath,25,29) # 25 and 29 is the index of the column
 
-def get_cd_mach(filepath):
-
-    mach = read_csv_col(filepath,25)
-    cd = read_csv_col(filepath,29)
-
-    plot_csv_cols(filepath,mach,cd)
-    
+def get_time_accel_z(filepath):
+    #mach = read_OR_csv_col(filepath,25)
+    #cd = read_OR_csv_col(filepath,29)
+    plot_csv_cols(filepath,0,3) # 25 and 29 is the index of the column
