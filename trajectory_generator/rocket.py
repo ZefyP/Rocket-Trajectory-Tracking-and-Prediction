@@ -3,7 +3,7 @@
 from .stage import Stage
 from typing import List, Callable
 import numpy as np
-from .drag import V2_rocket_drag_function
+from .drag import *
 from .launcher import Launcher
 from .atmosphere import Atmosphere
 from .utils import normalise_vector, lla2ecef
@@ -54,30 +54,38 @@ class Rocket:
 
     def __init__(self, name: str, country: str, launcher: Launcher,
                  use_cd_file: bool = False,
-                 flight_data: Flight_Data = None, # allow an instance of this class as an argument
+                 # flight_data: Flight_Data = None, # allow an instance of this class as an argument
                  drag_function: Callable[[List[Stage], float], float] = V2_rocket_drag_function,
                  thrust_function: Callable[[List[Stage], int], np.ndarray] = None):
         self.name = name
         self.country = country
         self.launcher = launcher
 
-        use_cd_file = use_cd_file
-        self.flight_data = flight_data
-
-        if use_cd_file:
-            if flight_data is None:
-                raise ValueError("If 'use_cd_file' is True, 'flight_data' must be provided. Check that the fetching and storing of CD from the external file is done correctly.")
-            
-            self.drag_function = self.flight_data.fetch_cd() # use the function to read data from file and fetch the Cd values
-            print("--------------------------------I USED THE CD FILE !!!!!!!!!!!")
-        else:
-            self.drag_function = V2_rocket_drag_function
-            print("--------------------------------I USED THE V2 FUNCTION~~~~~~~~")
-
+        self.use_cd_file = use_cd_file
+        self.drag_function = drag_function
         self.thrust_function = thrust_function
-
         # Set this to False to silence solver output
         self.logging_enabled = True
+
+        if use_cd_file:
+            drag_function = fetch_cd_function
+            print("--------------------------------I USED THE CD FILE !!!!!!!!!!!")
+        else:
+            drag_function = V2_rocket_drag_function
+            print("--------------------------------I USED THE V2 FUNCTION~~~~~~~~")
+
+
+    # def calculate_drag(self):
+
+    #     if self.use_cd_file:
+    #         if self.flight_data is None:
+    #             raise ValueError("If 'use_cd_file' is True, 'flight_data' must be provided. Check that the fetching and storing of CD from the external file is done correctly.")
+    #             cd = fetch_cd_function()# use the function to read data from file and fetch the Cd values
+    #     else:
+    #             cd = V2_rocket_drag_function()
+    #     return cd
+
+
 
     def run_simulation(self):
         # set single use flag

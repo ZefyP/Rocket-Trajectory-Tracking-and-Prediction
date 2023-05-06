@@ -16,6 +16,7 @@ flight_data = Flight_Data(
 
 
 
+
 kmini2_L = Stage(
     name="lower_stage",
     dry_mass= 0.577,            # kg
@@ -44,9 +45,9 @@ launch_site = Launcher(
     azimuth=0, # pointing to true north
     elevation=85 # pointing nearly to zenith
 )
-missile = Rocket("KMini2", "Sunride", launch_site, use_cd_file = True, flight_data = flight_data)
-missile.stages = [kmini2_L]
 
+missile = Rocket("KMini2", "Sunride", launch_site, use_cd_file = True)
+missile.stages = [kmini2_L]
 missile.run_simulation()
 
 # Save the simulated altitude and compate with real data 
@@ -54,7 +55,7 @@ missile.generate_csv_altitude_vs_time()
 missile.plot_altitude_range()
 
 # Wind.simulate_turbulence(20)
-# flight_data.get_mach_cd()
+flight_data.plot_mach_cd()
 # flight_data.get_time_accel_z()
 
 # flight_data.plot_data()

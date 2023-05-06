@@ -257,8 +257,15 @@ class Flight_Data:
         print(cd)
         return cd
 
+    def fetch_mach(self):
+        mach, _ = self.read_OR_csv_col(self.OR_data_filepath,25) # ignore the column header
+        mach = self.replace_nan(mach, replace_with= 0) # this will replace all nan in the array with 0
+        
+        print("--------------------------------I am in fetch_mach !!!!!!!!!")
+        print(mach)
+        return mach
 
-    def get_mach_cd(self):
+    def plot_mach_cd(self):
         #mach = read_OR_csv_col(filepath,25)
         #cd = read_OR_csv_col(filepath,29)
         self.plot_csv_cols(self.OR_data_filepath,25,29) # 25 and 29 is the index of the column
