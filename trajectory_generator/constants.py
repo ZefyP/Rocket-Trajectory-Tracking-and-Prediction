@@ -5,4 +5,7 @@ TIME_STEP = 0.2 # amount of seconds between each calculation
 N_TIME_INTERVALS = int(TRAJECTORY_TIMEOUT / TIME_STEP)
 EARTH_RADIUS = 6378137  # metres
 GRAVITY = 9.80665
+R = 287.058 # specific gas constant under the ideal gas low: J/(kg K)
+GAMMA = 1.4
+
 mpl_colours = ["royalblue", "darkviolet", "orangered", "gold"]

@@ -11,6 +11,7 @@ This repository contains code to predict the trajectory of a rocket. It implemen
 # Usage
 The code is organised into several modules, including:
 - `rocket.py`: contains the Rocket class, which is used to create and manage a rocket instance.
+-  `drag.py`: contains the 
 - `trajectory_generator.py`: contains the Trajectory class, which is used to model the rocket's behaviour.
 
 In addition it contains sample data files using real launch data obtained from launches of team Sunride from the University of Sheffield.

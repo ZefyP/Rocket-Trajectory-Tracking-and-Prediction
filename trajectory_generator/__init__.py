@@ -10,3 +10,4 @@ from .stage import *
 from .rocket import *
 from .wind import *
 from .flight_data import *
+from .parachute import *
