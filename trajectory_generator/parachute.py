@@ -2,8 +2,11 @@ import numpy as np
 import math
 from constants import GRAVITY as g
 from constants import R, GAMMA
+
 import matplotlib.pyplot as plt
 from scipy import interpolate
+from scipy.optimize import curve_fit
+
 
 
 class Parachute:
@@ -197,19 +200,49 @@ def parachute_cd(re, diameter):
     diameter (float): the diameter of the parachute (m)
     """
     if re <= 100000:
-        cd = 1.4
+        cd = 0.8
     elif re > 100000 and re <= 200000:
-        cd = 1.2
+        cd = 0.75
     else:
-        cd = 1.1
-    return cd * (diameter / 0.2) ** 2
+        cd = 0.7
+    return cd
 
+def alt_parachute_cd(re, diameter):
+    """
+    Calculates the drag coefficient of a parachute for a given Reynolds number and diameter.
+
+    Args:
+        re (float): Reynolds number
+        diameter (float): diameter of the parachute in meters
+
+    Returns:
+        float: drag coefficient
+    """
+    # Define the power law function
+    def power_law(re, a, b):
+        return a * re ** b
+
+    # Define the Reynolds number range for fitting the power law function
+    re_range = np.array([1000, 10000, 100000, 200000, 300000, 400000, 500000])
+
+    # Define the corresponding drag coefficient values
+    cd_range = np.array([0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.7])
+
+    # Fit the power law function to the data
+    popt, _ = curve_fit(power_law, re_range, cd_range)
+
+    # Calculate the drag coefficient using the fitted power law function
+    cd = power_law(re, *popt)
+
+    return cd
+    # return cd * (diameter / 0.2) ** 2
 
 def plot_re_cd():
     diameter = 0.12
     area = diameter**2
     re = calculate_reynolds_number(diameter, altitude, mach)
-    cd = parachute_cd(re, diameter)
+    # cd = alt_parachute_cd(re, diameter)
+    # cd = parachute_cd(re, diameter)
     # V = parachute_descent_speed(area, 0.577, 0.97, cd) # TODO: input dry mass from Stage class TODO: import rho from ambience
     
 
@@ -217,7 +250,7 @@ def plot_re_cd():
     re_range = np.linspace(0, 500000, 1000)
 
     # calculate corresponding drag coefficients using parachute_cd function
-    cd_range = [parachute_cd(re, diameter) for re in re_range]
+    cd_range = [alt_parachute_cd(re, diameter) for re in re_range]
 
     # create a plot
     plt.plot(re_range, cd_range)
