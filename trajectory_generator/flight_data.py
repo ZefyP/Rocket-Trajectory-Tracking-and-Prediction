@@ -14,32 +14,36 @@ class Flight_Data:
     desired_sample_time: float = TIME_STEP
 
     # Define the file path to the CSV file
-    file_path: str = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv"
+    real_data_path: str = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv"
     sim_filepath: str =  "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/lower_stage_altitude_vs_time.csv"
-   
-    # hex code for KML file styling
-    kml_colour: str  
 
-    def __init__(self, name, desired_sample_time, file_path, sim_filepath,
+    # import open rocket data file
+    OR_data_filepath: str = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/OR_karmanmini2.csv"
+       
+    # hex code for KML file styling
+    kml_colour: str 
+
+
+    def __init__(self, name, desired_sample_time, real_data_path, sim_filepath, OR_data_filepath,
                  kml_colour="ffffffff"):
         self.name = name
-        self.file_path = file_path
-        self.sim_filepath = sim_filepath
         self.desired_sample_time = desired_sample_time
+        self.real_data_path = real_data_path
+        self.sim_filepath = sim_filepath
+        self.OR_data_filepath = OR_data_filepath
         self.kml_colour = kml_colour
-        
 
 
         # define cross sectional area (m^2) for drag calculations
-        if not file_path:
-            print(f"WARNING: the filepath is not defined for {self.name}.")
+        if not real_data_path:
+            print(f"WARNING: the filepath of the Real launch data is not defined for {self.name}.")
             
 
     # Define a function to resample the data based on a desired sample time
-    def read_data_csv(self,filepath):
+    def read_data_csv(self,launch_data__path):
         
         # Read the CSV file
-        with open(filepath, "r") as f:
+        with open(launch_data__path, "r") as f:
             reader = csv.reader(f)
             next(reader) # skip header
             time = []
@@ -52,14 +56,14 @@ class Flight_Data:
 
         return np.array(time), np.array(altitude)
     
-    def resample_data(self,filepath):
+    def resample_data(self,real_data_path):
 
         # Define the output file path for the resampled data
-        base_file_name, extension = os.path.splitext(filepath)
+        base_file_name, extension = os.path.splitext(real_data_path)
         resampled_file = base_file_name + f"_resampled_{self.desired_sample_time:.1f}s" + extension
 
         # Read the CSV file
-        time, altitude = self.read_data_csv(filepath)
+        time, altitude = self.read_data_csv(real_data_path)
 
         # Resample the data using the interpolation function
         resampled_time = np.arange(time[0], time[-1], self.desired_sample_time)
@@ -107,8 +111,8 @@ class Flight_Data:
     def plot_data(self):
 
         # Resample the real data
-        resampled_file = self.resample_data(self.file_path)
-        sim_file = self.resample_data(self.sim_filepath)
+        resampled_file = self.resample_data(self.real_data_path)
+        sim_file = self.resample_data(self.real_data_path)
         # read
         resampled_time, resampled_altitude = self.read_data_csv(resampled_file)
         sim_resampled_time, sim_resampled_altitude = self.read_data_csv(sim_file)
@@ -175,66 +179,65 @@ class Flight_Data:
         # # Show the plot
         plt.show()
 
+    """
+    Manipulating OPENROCKET simulated data to improve the simulations : 
+    """
+            
+    
+    # This is tailored to OPEN ROCKET FILES 
+    def read_OR_csv_col(self, OR_data_filepath,column):
+        # Define a function to resample the data based on a desired sample time
+ 
+        # Read the CSV file
+        with open(self.OR_data_filepath, "r") as f:
+            reader = csv.reader(f)
+            # Skip 2 rows
+            for _ in range(2):
+                next(reader)
+
+            # Save the column header
+            col_header = next(reader)[column] 
+            # Define where the column data will be saved
+            data_column = []
+
+    # Save the data and skip empty and non-numerical cells
+            for row in reader:
+                # print(([column])) # DEBUG
+                try:
+                    cell = float(row[column])
+                except ValueError:
+                        continue
+                data_column.append(cell) # OpenRocket standard export
+
+        return ( np.array(data_column), col_header )
 
 
+    def plot_csv_cols(self,OR_data_filepath, col_x, col_y):
+        """
+        Takes desired columns of file and plots them.
+        """
+        x = []
+        y = []
+        x , x_header = self.read_OR_csv_col(OR_data_filepath, col_x)
+        y , y_header = self.read_OR_csv_col(OR_data_filepath, col_y)
+        print(x_header , y_header)
 
 
+        # Plot samples at the given frequency
+        fig, ax = plt.subplots(1, 1, figsize=(8, 3))
 
+        ax.plot(x,y)
+        ax.set_xlabel('{}'.format(x_header), fontsize = 10)
+        ax.set_ylabel('{}'.format(y_header), fontsize = 10)
+        ax.set_title('{} vs {}'.format(x_header,y_header), fontsize = 12)
+        plt.show()
 
-        
-        # # Store data from CSV files
-        # with open(resampled_file, "r") as f:
-        #     reader = csv.reader(f)
-        #     next(reader) # skip header
-        #     resampled_time = []
-        #     resampled_altitude = []
-        #     for row in reader:
-        #         resampled_time.append(float(row[0]))
-        #         resampled_altitude.append(float(row[1]))
+    def get_mach_cd(self):
+        #mach = read_OR_csv_col(filepath,25)
+        #cd = read_OR_csv_col(filepath,29)
+        self.plot_csv_cols(self.OR_data_filepath,25,29) # 25 and 29 is the index of the column
 
-        # with open(sim_file, "r") as f:
-        #     reader = csv.reader(f)
-        #     next(reader) # skip header
-        #     sim_time = []
-        #     sim_altitude = []
-        #     for row in reader:
-        #         sim_time.append(float(row[0]))
-        #         sim_altitude.append(float(row[1]))
-
-
-        # Check that resampled_time is within the range of sim_time
-        # if resampled_time[0] < sim_time[0] or resampled_time[-1] > sim_time[-1]:
-        #     raise ValueError("Resampled real data time is outside the range of simulated time")
-        
-        # # Interpolate the simulated data onto the same time points as the real data
-        # f_sim = interpolate.interp1d(sim_time, sim_altitude)
-        # sim_altitude_resampled = f_sim(sim_time)
-
-        # Calculate the error between the resampled data and the simulated data
-        # new_resampled_time = np.linspace(resampled_time[0], resampled_time[-1], len(sim_time))
-        # error = np.array(resampled_altitude) - np.array(f_sim(new_resampled_time))
-        # print(resampled_altitude, "   ", sim_altitude, "            ", error)
-
-        
-
-
-
-        
-        # # Create a figure and axis object
-        # fig, ax2 = plt.subplots()
-
-        # Plot data
-        # ax1.plot(resampled_time, resampled_altitude, label='Real Launch Data')
-        # ax1.plot(sim_time, sim_altitude_resampled, label='Simulation')
-
-        # # Set the axis labels and title
-        # ax1.set_xlabel("Time (s)")
-        # ax1.set_ylabel("Altitude (m)")
-        # ax1.set_title(f"Resampled Altitude vs. Time (Sample Time = {TIME_STEP} s)")
-        # ax1.legend()
-
-        # # Plot error data
-        # ax2.plot(resampled_time, error, label='Error')
-        # ax2.set_xlabel("Time (s)")
-        # ax2.set_ylabel("Altitude Error (m)")
-        # ax2.legend()
+    def get_time_accel_z(self):
+        #mach = read_OR_csv_col(filepath,25)
+        #cd = read_OR_csv_col(filepath,29)
+        self.plot_csv_cols(self.OR_data_filepath,0,3) # 25 and 29 is the index of the column

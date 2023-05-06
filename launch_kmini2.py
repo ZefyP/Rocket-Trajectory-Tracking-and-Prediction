@@ -35,17 +35,12 @@ launch_site = Launcher(
 )
 
 flight_data = Flight_Data(
-    "KarmanMini2 Relaunch",
-    TIME_STEP,
-    "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv",
-    "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/trajectory_generator/lower_stage_altitude_vs_time.csv"
+    name = "KarmanMini2 Relaunch Data",
+    desired_sample_time = TIME_STEP,
+    real_data_path = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv",
+    sim_filepath ="C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/trajectory_generator/lower_stage_altitude_vs_time.csv",
+    OR_data_filepath = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/OR_karmanmini2.csv"
 )
-
-# Wind.simulate_turbulence(20)
-OR_data_filepath = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/OR_karmanmini2.csv"
-drag.get_mach_cd(OR_data_filepath)
-drag.get_time_accel_z(OR_data_filepath)
-
 
 missile = Rocket("KMini2", "Sunride", launch_site)
 missile.stages = [kmini2_L]
@@ -54,6 +49,10 @@ missile.stages = [kmini2_L]
 
 # Save the simulated altitude and compate with real data 
 #missile.generate_csv_altitude_vs_time()
+
+# Wind.simulate_turbulence(20)
+flight_data.get_mach_cd()
+flight_data.get_time_accel_z()
 
 # flight_data.plot_data()
 # flight_data.environment_analysis()
