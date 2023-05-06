@@ -14,11 +14,11 @@ class Flight_Data:
     desired_sample_time: float = TIME_STEP
 
     # Define the file path to the CSV file
-    real_data_path: str = "Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv"
-    sim_filepath: str =  "Rocket-Trajectory-Tracking-and-Prediction/lower_stage_altitude_vs_time.csv"
+    real_data_path: str = "example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv"
+    sim_filepath: str =  "lower_stage_altitude_vs_time.csv"
 
     # import open rocket data file
-    OR_data_filepath: str = "Rocket-Trajectory-Tracking-and-Prediction/example/OR_karmanmini2.csv"
+    OR_data_filepath: str = "example/OR_karmanmini2.csv"
        
     # hex code for KML file styling
     kml_colour: str 
