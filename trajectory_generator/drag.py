@@ -109,12 +109,14 @@ def addParachute(
 
 
 class Altitude:
-    def __init__(self, dec_mode, apogee_alt, asc_rate, cd):
+    def __init__(self, descent_mode, apogee_alt, ascent_rate, cd):
 
         self.apogee_altitude = apogee_alt
-        self.ascent_rate = asc_rate
+        self.ascent_rate = ascent_rate
+
         self.drag_coeff = cd
-        self.descent_mode = dec_mode
+        self.descent_mode = descent_mode
+        
         self.initial_alt = None
         self.full_deployment_time = None
         self.previous_V_z = 0               # vertical speed
@@ -139,7 +141,8 @@ class Altitude:
         return pressure / (0.2869 * (temp + 273.1))
 
 
-    def get_altitude(self, time_into_flight, alt):
+    def predict_descend_altitude(self, time_into_flight, alt):
+
         if time_into_flight == 0:
             self.initial_alt = alt
             self.full_deployment_time = (self.apogee_altitude - self.initial_alt) / self.ascent_rate
@@ -182,12 +185,3 @@ class Altitude:
         terminal_velocity = -self.drag_coeff / math.sqrt(self.get_density(self.initial_alt))
         return terminal_velocity
     
-    def test_is_at_terminal_velocity():
-        """ Testing the terminal velocity function"""
-    model = Altitude(DESCENT_MODE_NORMAL, 3000.0, 10.0, 0.75)
-    # assuming initial altitude is 10000 meters and initial vertical velocity is 0
-    V_z = -model.drag_coeff / math.sqrt(get_density(10000))
-    assert model.is_at_terminal_velocity(V_z) == False
-    # after some time, the vertical velocity should approach terminal velocity
-    V_z = -model.drag_coeff / math.sqrt(get_density(7000))
-    assert model.is_at_terminal_velocity(V_z) == True
