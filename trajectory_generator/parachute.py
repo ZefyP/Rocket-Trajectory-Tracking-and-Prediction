@@ -1,7 +1,7 @@
 import numpy as np
 import math
-from constants import GRAVITY as g
-from constants import R, GAMMA
+from trajectory_generator.constants import GRAVITY as g
+from trajectory_generator.constants import R, GAMMA
 
 import matplotlib.pyplot as plt
 from scipy import interpolate
@@ -209,7 +209,7 @@ def parachute_cd(re, diameter):
 
 def alt_parachute_cd(re, diameter):
     """
-    Calculates the drag coefficient of a parachute for a given Reynolds number and diameter.
+    Alternative way that calculates the drag coefficient of a parachute for a given Reynolds number and diameter.
 
     Args:
         re (float): Reynolds number

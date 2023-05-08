@@ -6,9 +6,10 @@
 from trajectory_generator.stage import Stage
 from trajectory_generator.flight_data import Flight_Data
 from trajectory_generator.parachute import Parachute
+from trajectory_generator.constants import GRAVITY as G, TIME_STEP
 from typing import List, Callable
 
-import csv
+import csv, math
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -104,3 +105,89 @@ def addParachute(
 
             # Return self
             return parachutes[-1]
+
+
+
+class Altitude:
+    def __init__(self, dec_mode, apogee_alt, asc_rate, cd):
+
+        self.apogee_altitude = apogee_alt
+        self.ascent_rate = asc_rate
+        self.drag_coeff = cd
+        self.descent_mode = dec_mode
+        self.initial_alt = None
+        self.full_deployment_time = None
+        self.previous_V_z = 0               # vertical speed
+        
+    def get_density(altitude):
+        # source : https://www.grc.nasa.gov/WWW/K-12/airplane/atmosmet.html
+        if altitude > 25000: # meters
+            """ Upper Stratosphere Model"""
+            temp = -131.21 + 0.00299 * altitude # in celcius
+            pressure = 2.488 * pow((temp+273.1)/216.6,-11.388) # pressure decreases exponentially
+
+        elif altitude <= 25000 and altitude > 11000:
+            """ Lower Stratosphere Model"""
+            temp = -56.46
+            pressure = 22.65 * math.exp(1.73 - 0.000157 * altitude)
+
+        else:
+            """ Troposphere Model"""
+            temp = 15.04 - 0.00649 * altitude
+            pressure = 101.29 * pow((temp + 273.1)/288.08,5.256)
+
+        return pressure / (0.2869 * (temp + 273.1))
+
+
+    def get_altitude(self, time_into_flight, alt):
+        if time_into_flight == 0:
+            self.initial_alt = alt
+            self.full_deployment_time = (self.apogee_altitude - self.initial_alt) / self.ascent_rate
+
+        if self.descent_mode == 0:
+            if time_into_flight <= self.full_deployment_time:
+                alt = self.initial_alt + time_into_flight * self.ascent_rate
+                return True, alt
+
+        V_z = -self.drag_coeff / math.sqrt(self.get_density(alt))
+        
+        if self.is_at_terminal_velocity(V_z):
+            V_z = 0
+        else:
+            V_z = self.calculate_V_z(V_z)
+
+        alt = alt + TIME_STEP * V_z
+
+        if alt <= 0:
+            return False, alt
+
+        return True, alt
+    
+    def is_at_terminal_velocity(self, V_z):
+        """
+        If the parachute deploys successfully, we expect terminal velocity within the first 3-5 seconds. 
+        """
+        return math.isclose(V_z, self.calculate_terminal_velocity(), rel_tol=0.01)
+
+    def calculate_V_z(self, V_z):
+        if V_z < self.previous_V_z - G*TIME_STEP:
+            V_z = self.previous_V_z - G*TIME_STEP
+        elif V_z > self.previous_V_z + G*TIME_STEP:
+            V_z = self.previous_V_z + G*TIME_STEP
+
+        self.previous_V_z = V_z
+        return V_z
+
+    def calculate_terminal_velocity(self):
+        terminal_velocity = -self.drag_coeff / math.sqrt(self.get_density(self.initial_alt))
+        return terminal_velocity
+    
+    def test_is_at_terminal_velocity():
+        """ Testing the terminal velocity function"""
+    model = Altitude(DESCENT_MODE_NORMAL, 3000.0, 10.0, 0.75)
+    # assuming initial altitude is 10000 meters and initial vertical velocity is 0
+    V_z = -model.drag_coeff / math.sqrt(get_density(10000))
+    assert model.is_at_terminal_velocity(V_z) == False
+    # after some time, the vertical velocity should approach terminal velocity
+    V_z = -model.drag_coeff / math.sqrt(get_density(7000))
+    assert model.is_at_terminal_velocity(V_z) == True
