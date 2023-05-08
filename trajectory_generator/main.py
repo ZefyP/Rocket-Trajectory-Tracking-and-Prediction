@@ -18,17 +18,15 @@ else:
 # Add a usage message
 if __name__ == '__main__':
     args = parser.parse_args()
-        
-    # Add a usage message
-    if __name__ == '__main__':
-        print('Usage: trajectory_generator [OPTIONS]\n')
-        print('Options:')
-        # print('  --step INT       number of time step to compute (in seconds)')
-        print('  --output str      output file name')
-        print('  -v, --verbose     print the flight log during simulation')
 
-        print('[!] In this simulation:')
-        
+    print('Usage: trajectory_generator [OPTIONS]\n')
+    print('Options:')
+    # print('  --step INT       number of time step to compute (in seconds)')
+    print('  --output str      output file name')
+    print('  -v, --verbose     print the flight log during simulation')
+
+    print('[!] In this simulation:')
+    
     if args.verbose:
         print("Verbose mode is on.")
     
