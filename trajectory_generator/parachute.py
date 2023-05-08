@@ -3,8 +3,9 @@
 import numpy as np
 import math
 from trajectory_generator.constants import GRAVITY as g
-from trajectory_generator.constants import R, GAMMA
-
+#from trajectory_generator.constants import R, GAMMA
+R = 287.058 # specific gas constant under the ideal gas low: J/(kg K)
+GAMMA = 1.4
 import matplotlib.pyplot as plt
 from scipy import interpolate
 from scipy.optimize import curve_fit
@@ -27,16 +28,16 @@ class Parachute:
 
     lag : float         # time between the parachute ejection system and full deployment/parachute fully open
 
-    pressureSignal:list # (t, pressure) list that is passed to the trigger function
+    #pressureSignal:list # (t, pressure) list that is passed to the trigger function
 
     def __init__(
             
             self,
             name,
             diameter,
-            shape,
-            trigger,
-            lag
+            shape ='square',
+            trigger = True,
+            lag = 0.1
     ):
         
         self.name = name
@@ -44,9 +45,8 @@ class Parachute:
         self.shape = shape
         self.trigger = trigger
         self.lag = lag
-        self.altitudeSignal = altitudeSignal = []
+        # self.altitudeSignal = altitudeSignal = []
 
-        return None
 
     def get_chute_surface_area(self,shape = 'square'):
         # source: https://www.apogeerockets.com/education/downloads/Newsletter449.pdf

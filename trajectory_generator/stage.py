@@ -5,13 +5,13 @@ This class represents one stage of a body/missile or rocket.
 All units are SI unless otherwise specified.
 """
 import numpy as np
-from .constants import TRAJECTORY_TIMEOUT, TIME_STEP, N_TIME_INTERVALS, EARTH_RADIUS, GRAVITY
-from .atmosphere import Atmosphere
-from .utils import ecef2lla # earth centered coordinates to latitude-longitude-altitude
+from constants import TRAJECTORY_TIMEOUT, TIME_STEP, N_TIME_INTERVALS, EARTH_RADIUS, GRAVITY
+from atmosphere import Atmosphere
+from utils import ecef2lla # earth centered coordinates to latitude-longitude-altitude
 import simplekml
 
 from typing import List
-from .parachute import Parachute
+from parachute import Parachute
 
 
 class Stage:

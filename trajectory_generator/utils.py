@@ -6,7 +6,7 @@ to be modular and reusable, with clear input and output specs.
 The script is intended to improve code reusability, reduce code duplication and improve code readability.
 """
 import numpy as np
-from .constants import EARTH_RADIUS
+from constants import EARTH_RADIUS
 
 
 def ecef2aer(a, b):

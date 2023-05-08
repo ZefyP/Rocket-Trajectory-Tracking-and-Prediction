@@ -1,14 +1,27 @@
 from trajectory_generator.stage import Stage
-from trajectory_generator.parachute import Parachute
+from parachute import Parachute
 
 # Create two parachute objects
-para1 = Parachute("Drogue", 0.75, "circle", lambda p, s: p < 101325)
-para2 = Parachute("Main", 4.0, "ellipse", lambda p, s: p < 101325 and s[1] < 1000)
+# para1 = Parachute("Drogue", 0.75, "square", lambda p, s: p < 101325)
+# para2 = Parachute("Main", 4.0, "square", lambda p, s: p < 101325 and s[1] < 1000)
+para1 = Parachute("Drogue", 0.75, "square", True, 1.5)
+para2 = Parachute("Main", 4.0, "square", True, 1.5)
 
 # Create a stage object and add the parachutes to it
-stage1 = Stage("First Stage", 10000, 100000, 1000000, 10.0,
-                diameter=5.0, length=20.0, parachutes=[para1, para2])
 
+
+stage1 = Stage(
+    name="First Stage",
+    dry_mass= 0.577,            # kg
+    fuel_mass=0.650-0.577,      # kg
+    thrust= 64,                 # N
+    burn_time=1.01,             # s
+    diameter=0.0411,            # m
+    length = 0.848,             # m
+    separation_time= 1,         # s
+    parachutes=[para1, para2],
+    kml_colour="ffffff00"
+)
 # Print out the stage attributes
 print(f"Stage name: {stage1.name}")
 print(f"Stage dry mass: {stage1.dry_mass}")
