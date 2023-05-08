@@ -10,6 +10,9 @@ from .atmosphere import Atmosphere
 from .utils import ecef2lla # earth centered coordinates to latitude-longitude-altitude
 import simplekml
 
+from typing import List
+from .parachute import Parachute
+
 
 class Stage:
     name: str = None
@@ -42,6 +45,13 @@ class Stage:
     # used to determine the amount of fuel used
     # if not given, all fuel is assumed to be burnt linearly with burn_time
     specific_impulse: float
+
+    """
+    A list of parachutes of the stage.
+    The index 0 represents the first parachute to be deployed.
+    """
+    parachutes: List[Parachute] = []
+   
 
     # time vector
     time: np.ndarray
@@ -81,16 +91,23 @@ class Stage:
     def __init__(self, name, dry_mass, fuel_mass, thrust, burn_time,
                  specific_impulse=None, separation_time=0,
                  diameter=None, length=1,cross_sectional_area=None,
+                 parachutes: List[Parachute] = None,
                  kml_colour="ffffffff"):
         self.name = name
         self.dry_mass = dry_mass
         self.fuel_mass = fuel_mass
+        self.total_mass = dry_mass + fuel_mass
         self.thrust = thrust
         self.burn_time = burn_time
         self.separation_time = separation_time
+
+        self.parachutes = [] if parachutes is None else parachutes
+        # self.chute_cd: List[float] = []
+        for chute in self.parachutes:
+            self.add_parachute(chute)
+
         self.kml_colour = kml_colour
 
-        self.total_mass = dry_mass + fuel_mass
 
         # define cross sectional area (m^2) for drag calculations
         if not diameter and not cross_sectional_area:
@@ -165,6 +182,22 @@ class Stage:
         # The gravity vector is the product of its magnitude and direction.
         return gravity_magnitude * gravity_direction
     
+    
+    """Add an already existing parachute object to the stage"""
+    def add_parachute(self, parachute: Parachute):
+        self.parachutes.append(parachute)
+        #self.chute_cd.append(parachute.get_cd())
+
+    # def deploy_parachute(stage):
+    #     # Deploys the parachute for a given stage.
+
+    #     # Wait for the parachute lag time.
+    #     time.sleep(stage.parachute_lag_time) 
+        
+    def get_chute_drag(self, V, rho ):
+        # TODO  
+        return None
+
 
     def get_lla_position_vector(self):
         lat, long, alt = ecef2lla(self.position[0, :], self.position[1, :], self.position[2, :])
@@ -243,3 +276,39 @@ class Stage:
                f"Burn Time:            {float(self.burn_time):{format_string}} s\n" + \
                f"Separation Time:      {float(self.separation_time):{format_string}} s\n" + \
                extra_info
+
+
+
+"""in development"""
+# def addParachute(
+#                 name, diameter,shape, trigger, lag=0
+#             ):
+#                 """
+#                 Generates a new parachute and records its attributes, 
+#                 such as its opening delay, drag coefficient, and trigger function.
+
+#                 Args
+#                 ----
+#                 name : string
+#                                 Name of the parachute, such as drogue and main. The name has no impact on the simulation and is only used to present data in a more organized manner.
+#                 CdS : float
+#                                 The drag coefficient multiplied by the reference area for the parachute. It is used to compute the drag force on the parachute by using the equation F = ((1/2)*rho*V^2)*CdS. The drag force is the dynamic pressure on the parachute multiplied by its CdS coefficient. It is expressed in square meters.
+#                 trigger : function
+#                                 A function that determines if the parachute ejection system is to be triggered. It must take the freestream pressure in pascal and the simulation state vector as inputs, which is defined by [x, y, z, vx, vy, vz, e0, e1, e2, e3, wx, wy, wz]. It will be called according to the given sampling rate. If the parachute ejection system should be triggered, it should return True, otherwise False.
+#                 lag : float, optional
+#                                 The time between the parachute ejection system being triggered and the parachute being fully opened. During this time, the simulation assumes the rocket is flying without a parachute. The default value is 0, and it should be given in seconds.
+            
+#                 Returns
+#                 -------
+#                 parachute : Parachute
+#                     A Parachute that contains the trigger, lag, CdS, and name. 
+#                     It also stores cleanPressureSignal, noiseSignal, and noisyPressureSignal, which are filled in during the flight simulation.
+#                 """
+#                 # Create a parachute
+#                 parachute = Parachute(name, diameter,shape, trigger, lag)
+
+#                 # Add parachute to list of parachutes
+#                 parachutes.append(parachute)
+
+#                 # Return self
+#                 return parachutes[-1]

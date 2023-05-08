@@ -58,7 +58,9 @@ class Rocket:
                  use_cd_file: bool = False,
                  flight_data: Flight_Data = None, # allow an instance of this class as an argument
                  drag_function: Callable[[List[Stage], float], float] = V2_rocket_drag_function,
-                 thrust_function: Callable[[List[Stage], int], np.ndarray] = None):
+                 thrust_function: Callable[[List[Stage], int], np.ndarray] = None
+                 #chute_cd: Stage.parachutes(get_chute_cd())
+                 ):
         
         self.name = name
         self.country = country
@@ -231,6 +233,26 @@ class Rocket:
                     drag_vector = 1 / 2 * atmosphere.density * A * Cd * velocity_magnitude ** 2 * drag_direction
                     # self.log(f"[{self.name}] [{stage.time[i]}] DRAG {active_stage.name} with vector  {drag_vector} ") # ---------------
 
+                #     """Determine the parachute drag vector"""
+                # if mach_number is None:
+                #     chute_Cd = 0
+                # else:
+                #     chute_Cd = self.get_chute_cd(stages_to_consider, mach_number, self.flight_data)
+                #     chute_A = Parachute.get_chute_surface_area()
+                # if chute_Cd == 0:
+                #     # coefficient of drag = 0 corresponds to no drag
+                #     chute_drag_vector = np.array([0, 0, 0]) # pos neg pos
+                # else:
+                #     velocity = stage.velocity[:, i - 1]
+                #     velocity_magnitude = np.sqrt(velocity.dot(velocity))
+                #     if velocity_magnitude != 0:
+                #         chute_drag_direction = - normalise_vector(stage.velocity[:, i - 1])
+                #     else:
+                #         drag_direction = 0
+                #     chute_drag_magnitude = 1 / 2 * atmosphere.density * chute_A * chute_Cd * velocity_magnitude ** 2
+                #     chute_drag_vector = -1 * chute_drag_magnitude * chute_drag_direction
+
+
                 # calculate centrifugal force
 
                 # omega represents rotation vector pointed along Z axis
@@ -242,7 +264,7 @@ class Rocket:
                 f_coriolis = np.cross(-2 * mass * omega, v_r)
 
                 # add up forces acting on the rocket
-                sum_forces = drag_vector + gravity_vector + thrust_vector + f_centrifugal + f_coriolis 
+                sum_forces = drag_vector + gravity_vector + thrust_vector + f_centrifugal + f_coriolis + chute_drag_vector
 
                 # determine acceleration (F=ma)
                 acceleration = sum_forces / mass
