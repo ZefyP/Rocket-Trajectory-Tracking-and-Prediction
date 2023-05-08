@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .cli import *
+from .main import *
 from .constants import *
 from .utils import *
 from .atmosphere import *
