@@ -7,22 +7,19 @@ import numpy as np
 import scipy.signal as signal
 import matplotlib.pyplot as plt
 import warnings
+import math
+
+from mpl_toolkits.mplot3d import Axes3D
 
 
 
 """
 TODO:
-Adding an instance variable to store the altitude and use it in methods that need it.
-
 Adding a method to simulate turbulence for different altitudes using the simulate_turbulence method in the Atmosphere class.
-
-Modifying the simulate_turbulence method to return the turbulence values instead of plotting them so that we can use them in the turbulence_vector method.
 
 Adding a method to generate a wind profile by combining the turbulence vectors with wind direction vectors for different altitudes.
 
 Adding a method to save the wind profile to a file.
-
-Modifying the wind_direction method to return the wind direction vector based on the input angle in radians.
 
 Adding methods to plot the wind profile in 3D and 2D.
 """
@@ -208,9 +205,99 @@ class Wind:
 
         plt.show()
 
+    def generate_wind_profile(self,altitudes, wind_speed, wind_dir, turbulence_freq):
+        """
+        Generate a wind profile by combining the turbulence vectors with wind direction vectors for different altitudes.
 
-wind = Wind(5000)
-wind.plot_wind(10, 'north')
+        Parameters:
+        altitudes   (list): List of altitudes at which the wind profile needs to be generated.
+        wind_speed  (float): Mean wind speed at the ground level. # TODO: Add to class objects. User should obtain from weather forecast. 
+        wind_dir    (str): Wind direction at the ground level in degrees.
+        turbulence_freq (int): Turbulence intensity at the ground level.
+
+        Returns:
+        wind_profile (list): A list of 3D vectors representing the wind profile at different altitudes.
+        """
+        # Generate wind profile at different altitudes
+        wind_profile = []  # x , y , z
+        for altitude in altitudes:
+            turbulence_vector = self.turbulence_vector(turbulence_freq, wind_dir)
+            wind_dir_vector = self.wind_direction(wind_dir)
+            # Compute the altitude factor based on the input altitude. 
+            # The altitude factor is used to adjust the magnitude of the wind vectors based on the altitude.
+            altitude_factor = (altitude / 10) ** (1 / 7)
+
+            # Set wind wind speed to vary with altitude according to a power law. # TODO: backup with source and specify per atmospheric layer.
+            wind_speed_factor = wind_speed * altitude_factor
+
+            # Combine the wind direction and the turbulence vector.
+            # This represents the direction and magnitude of the wind at the given altitude and location.
+            wind_vector = [wind_dir_vector[i] * wind_speed_factor + turbulence_vector[i] for i in range(3)]
+            wind_profile.append(wind_vector)
+        return wind_profile
+        
+        
+    def plot_wind_profile_3d(wind_profile):
+        """
+        Plot the wind profile in 3D.
+
+        Parameters:
+        wind_profile (list): A list of 3D vectors representing the wind profile.
+
+        Returns:
+        None
+        """
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        for vector in wind_profile:
+            ax.quiver(0, 0, 0, vector[0], vector[1], vector[2])
+        plt.show()
+
+    def plot_wind_profile_2d(wind_profile):
+        """
+        Plot the wind profile in 2D.
+
+        Parameters:
+        wind_profile (list): A list of 3D vectors representing the wind profile.
+
+        Returns:
+        None
+        """
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        for vector in wind_profile:
+            plt.quiver(0, 0, vector[0], vector[1], scale=100)
+        plt.show()
+
+
+altitudes = list(range(0,1001,10)) # altitude range 0-1000 meters
+wind = Wind(altitudes)
+
+# Generate a wind profile with altitude range from 0 to 1000 meters
+wind_profile = wind.generate_wind_profile(  altitudes,
+                                            wind_speed = 10, # at ground level
+                                            wind_dir = 'north',
+                                            turbulence_freq= 20 )
+
+# Plot the wind profile in 3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+wind.plot_wind_profile_3d(ax, wind_profile)
+plt.show()
+
+# Plot the wind profile in 2D
+fig, ax = plt.subplots()
+wind.plot_wind_profile_2d(ax, wind_profile)
+plt.show()
+
+
+
+
+# wind = Wind(5000)
+# wind.plot_wind(10, 'north')
 
 # for altitude in range(100,1000,10):
 

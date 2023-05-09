@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from trajectory_generator import Rocket, Stage, Launcher
+from trajectory_generator import Rocket, Stage, Launchsite
 from trajectory_generator import Flight_Data, Wind, drag
 from trajectory_generator.constants import TIME_STEP
 
@@ -36,7 +36,7 @@ kmini2_U = Stage(
     kml_colour="ffffff00"
 )
 
-launch_site = Launcher(
+launch_site = Launchsite(
     "Midlands Rocketry Club, United Kingdom",
     latitude = 52.668250, longitude= -1.524632, altitude = 10,
     azimuth = 0,      # pointing to true north
