@@ -43,7 +43,6 @@ class Wind:
         Returns:
             None
         """
-         
         # Generate white noise with 10000 samples
         white_noise = np.random.randn(10000)
 
