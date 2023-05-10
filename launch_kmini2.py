@@ -52,7 +52,7 @@ rocket.generate_csv_altitude_vs_time()
 rocket.plot_altitude_range()
 
 # Wind.simulate_turbulence(20)
-flight_data.plot_mach_cd()
+# flight_data.plot_mach_cd()
 # flight_data.get_time_accel_z()
 
 # flight_data.plot_data()

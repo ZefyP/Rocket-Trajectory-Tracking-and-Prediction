@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
-#from simulator import Launcher, Stage, Rocket
-from trajectory_generator import Rocket, Stage, Launcher
+#from simulator import Launchsite, Stage, Rocket
+from trajectory_generator import Rocket, Stage, Launchsite
 
  
 booster = Stage(
@@ -24,7 +24,7 @@ dart = Stage(
     kml_colour="ff3c14dc"
 )
 
-launch_site = Launcher(
+launch_site = Launchsite(
     "Romania Launch Site",
     latitude=45.519722, longitude=27.910278, altitude=120,
     azimuth=0, elevation=85

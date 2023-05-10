@@ -4,7 +4,7 @@ from .stage import Stage
 from typing import List, Callable
 import numpy as np
 from .drag import *
-from .launcher import Launcher
+from .launchsite import Launchsite
 from .atmosphere import Atmosphere
 from .utils import normalise_vector, lla2ecef
 from .constants import *
@@ -50,11 +50,11 @@ class Rocket:
     """
     thrust_function: Callable[[List[Stage], int], np.ndarray]
    
-    launcher: Launcher
+    launchsite: Launchsite
 
     def __init__(self, name: str, 
                  country: str, 
-                 launcher: Launcher,
+                 launchsite: Launchsite,
                  use_cd_file: bool = False,
                  flight_data: Flight_Data = None, # allow an instance of this class as an argument
                  drag_function: Callable[[List[Stage], float], float] = V2_rocket_drag_function,
@@ -64,7 +64,7 @@ class Rocket:
         
         self.name = name
         self.country = country
-        self.launcher = launcher
+        self.launchsite = launchsite
         
         self.flight_data = flight_data
         self.use_cd_file = use_cd_file
@@ -87,8 +87,8 @@ class Rocket:
         apogee_time = None
         # set initial position and velocity of each stage
         for stage in self.stages:
-            stage.position[:, 0] = self.launcher.position_ECEF
-            stage.velocity[:, 0] = self.launcher.initial_velocity
+            stage.position[:, 0] = self.launchsite.position_ECEF
+            stage.velocity[:, 0] = self.launchsite.initial_velocity
 
             # initial lat-long-alt and surface position calculated
             lat, long, alt = stage.get_lla(0)
@@ -200,9 +200,9 @@ class Rocket:
                 # determine thrust vector
                 if i == 1 and np.all(stage.velocity[:, 0] == 0):
                     # if on the launch pad then the thrust is oriented in the 
-                    # same direction as the launcher
+                    # same direction as the launchsite
                     # unless the stage has an initial velocity
-                    thrust_vector = self.launcher.orientation_ECEF * thrust_magnitude
+                    thrust_vector = self.launchsite.orientation_ECEF * thrust_magnitude
                 elif self.thrust_function is not None and thrust_magnitude > 0:
                     thrust_vector = self.thrust_function(stages_to_consider, i - 1)
                 else:
@@ -264,8 +264,8 @@ class Rocket:
                 f_coriolis = np.cross(-2 * mass * omega, v_r)
 
                 # add up forces acting on the rocket
-                sum_forces = drag_vector + gravity_vector + thrust_vector + f_centrifugal + f_coriolis + chute_drag_vector
-
+                sum_forces = drag_vector + gravity_vector + thrust_vector + f_centrifugal + f_coriolis 
+                # + chute_drag_vector
                 # determine acceleration (F=ma)
                 acceleration = sum_forces / mass
                 

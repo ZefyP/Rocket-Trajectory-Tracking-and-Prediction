@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 """
-This class represents the rocket launcher on the launch pad. 
-It utilises the launcher's name, location, orientation, and initial velocity.
-It includes methods to convert the launcher's latitude, longitude, and altitude to ECEF coordinates, 
-as well as calculate the unit vectors for the rocket's initial position and orientation on the launcher pad.
+This class represents the rocket launchsite on the launch pad. 
+It utilises the launchsite's name, location, orientation, and initial velocity.
+It includes methods to convert the launchsite's latitude, longitude, and altitude to ECEF coordinates, 
+as well as calculate the unit vectors for the rocket's initial position and orientation on the launchsite pad.
 """
 
 import numpy as np
 from .utils import lla2ecef, aer2ecef_unit_vector
 
 
-class Launcher:
+class Launchsite:
     name: str
 
     latitude: float     # latitude of launch site

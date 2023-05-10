@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from trajectory_generator import Rocket, Stage, Launcher
+from trajectory_generator import Rocket, Stage, Launchsite
 
 lower_stage = Stage(
     name="Lower stage",
@@ -34,7 +34,7 @@ another_stage = Stage(
     kml_colour="ff91ff00"
 )
 
-hebrides = Launcher(
+hebrides = Launchsite(
     "Hebrides",
     latitude=57.360934, longitude=-7.402981, altitude=30,
     azimuth=-90, elevation=85
@@ -48,6 +48,6 @@ missile.plot_all()
 
 for stage in missile.stages:
     stage.export_KML(
-        f"output/{missile.name}_{stage.name}.kml",
+        f"output/example_rocket/{missile.name}_{stage.name}.kml",
         downsample_factor=10,
     )
