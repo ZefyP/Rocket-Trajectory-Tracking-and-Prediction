@@ -228,14 +228,48 @@ class Real_Data:
         return ( np.array(data_column), col_header )
 
 
-    def plot_csv_cols(self,OR_data_filepath, col_x, col_y):
+
+    """
+    Manipulating EASYMEGA recored data to improve the simulations : 
+
+    """
+
+     # This is tailored to pre processed files (row[0]: skipped, row[1]: header, row[2+n]:data)
+    def read_csv_col(self,real_data_filepath, column):
+        # Define a function to resample the data based on a desired sample time
+ 
+        # Read the CSV file
+        with open(real_data_filepath, "r") as f:
+            reader = csv.reader(f)
+            # Skip 1 row
+            for _ in range(1):
+                next(reader)
+
+            # Save the column header
+            col_header = next(reader)[column] 
+            # Define where the column data will be saved
+            data_column = []
+
+    # Save the data and skip empty and non-numerical cells
+            for row in reader:
+                # print(([column])) # DEBUG
+                try:
+                    cell = float(row[column])
+                except ValueError:
+                        continue
+                data_column.append(cell) # OpenRocket standard export
+
+        return ( np.array(data_column), col_header )
+   
+   
+    def plot_csv_cols(self,filepath, col_x, col_y):
         """
         Takes desired columns of file and plots them.
         """
         x = []
         y = []
-        x , x_header = self.read_OR_csv_col(OR_data_filepath, col_x)
-        y , y_header = self.read_OR_csv_col(OR_data_filepath, col_y)
+        x , x_header = self.read_OR_csv_col(filepath, col_x)
+        y , y_header = self.read_OR_csv_col(filepath, col_y)
         print(x_header , y_header)
 
 
