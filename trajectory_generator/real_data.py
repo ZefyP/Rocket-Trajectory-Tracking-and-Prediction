@@ -6,7 +6,7 @@ from trajectory_generator.constants import *
 import os
 from ambiance import Atmosphere
 
-class Flight_Data:
+class Real_Data:
     
     name: str = None
 

@@ -6,7 +6,7 @@ from trajectory_generator.constants import TIME_STEP
 from trajectory_generator.atmosphere import Atmosphere
 import os
 
-flight_data = Real_Data(
+real_data = Real_Data(
     name = "KarmanMini2 Relaunch Data",
     desired_sample_time = TIME_STEP,
     real_data_path = "example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv",
@@ -43,7 +43,7 @@ launch_site = Launchsite(
     elevation = 85    # pointing nearly to zenith
 )
 
-# rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = False, flight_data = flight_data)
+# rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = False, real_data = real_data)
 
 rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = False)
 
@@ -58,18 +58,18 @@ rocket.plot_altitude_range()
 # print("this is hte density!!", dens.density)
 
 # Wind.simulate_turbulence(20)
-# flight_data.plot_mach_cd()
-# flight_data.get_time_accel_z()
+# real_data.plot_mach_cd()
+# real_data.get_time_accel_z()
 
-# flight_data.plot_data()
-# flight_data.environment_analysis()
+# real_data.plot_data()
+# real_data.environment_analysis()
 
 
 
 #rocket.plot_all()
 #rocket.plot_accel()
 #rocket.generate_csv_altitude_vs_time()
-# flight_data.compare("C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv")
+# real_data.compare("C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv")
 
 for stage in rocket.stages:
     output_dir = 'output'

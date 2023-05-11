@@ -57,7 +57,7 @@ class Rocket:
                  country: str, 
                  launchsite: Launchsite,
                  use_cd_file: bool = False,
-                 real_data: Real_data = None, # allow an instance of this class as an argument
+                 real_data: Real_Data = None, # allow an instance of this class as an argument
                  drag_function: Callable[[List[Stage], float], float] = V2_rocket_drag_function,
                  thrust_function: Callable[[List[Stage], int], np.ndarray] = None
                  #chute_cd: Stage.parachutes(get_chute_cd())

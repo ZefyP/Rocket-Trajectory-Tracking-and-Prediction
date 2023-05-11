@@ -4,7 +4,7 @@
  The data is derived from a reference source, Sutton's "Rocket Propulsion Elements", 7th edition, page 108. 
 """
 from trajectory_generator.stage import Stage
-from real_data import Real_Data
+from trajectory_generator.real_data import Real_Data
 from trajectory_generator.parachute import Parachute
 from trajectory_generator.constants import GRAVITY as G, TIME_STEP
 from typing import List, Callable
@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def V2_rocket_drag_function(stages: List[Stage], mach: float, flight_data: Real_Data) -> float:
+def V2_rocket_drag_function(stages: List[Stage], mach: float, real_data: Real_Data) -> float:
     # Drag function for V2
     drag_coefficient: float = 0
 
@@ -33,15 +33,15 @@ def V2_rocket_drag_function(stages: List[Stage], mach: float, flight_data: Real_
     # print(mach, drag_coefficient) # DEBUG
     return drag_coefficient
 
-def fetch_cd_function(stages: List[Stage], mach: float, flight_data: Real_Data) -> float:
+def fetch_cd_function(stages: List[Stage], mach: float, real_data: Real_Data) -> float:
     """
     Returns a callable function that takes a Mach number and returns the drag coefficient (CD) for that Mach number.
     The CD data is fetched from the Flight_Data instance provided.
     """
 
     # print("Trying to fetch cd function from the Drag module") # DEBUG
-    cd_data = flight_data.fetch_cd()
-    mach_data = flight_data.fetch_mach()
+    cd_data = real_data.fetch_cd()
+    mach_data = real_data.fetch_mach()
     # print(mach_data,cd_data) # DEBUG
 
     def get_cd(mach: float) -> float:
