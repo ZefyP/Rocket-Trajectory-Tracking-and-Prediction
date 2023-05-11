@@ -13,6 +13,11 @@ import simplekml
 from typing import List
 from trajectory_generator.parachute import Parachute
 
+# TODO: 
+# - add argument for input of real data filepath. make a function that takes real velocity, processes it
+# - The function decides to output recoreded real velocity until no more data points, 
+# - Then the function iterates from there using calculation with initial conditions the last real measurement to return the next predicted velocity.
+# - Add an argument that chooses to only simulate if a filepath is not provided.
 
 class Stage:
     name: str = None

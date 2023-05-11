@@ -19,7 +19,7 @@ plt.style.use("ggplot")
 
 from typing import List, Callable
 
-from .drag import *
+from drag import *
 from .utils import normalise_vector, lla2ecef
 from .constants import *
 
@@ -27,7 +27,7 @@ from .stage import Stage
 from .launchsite import Launchsite
 from .rocket import Rocket
 from .atmosphere import Atmosphere
-from trajectory_generator import Real_Data
+from .real_data import Real_Data
 
 
 
@@ -114,8 +114,8 @@ class Investigator:
          # TR2 Recorded Flight 1 (single stage)
         real_data = Real_Data()
         file = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/TR2_EasyMega_Flight_Data.csv"
-        time, _ = real_data.read_csv_col(file, 3)   # remember this function returns tuple
-        time = real_data.resample_array(time,TIME_STEP) # refitted to match the simulation TIME_STEP
+        time_rec, _ = real_data.read_csv_col(file, 3)   # remember this function returns tuple
+        time_rec = real_data.resample_array(time_rec,TIME_STEP) # refitted to match the simulation TIME_STEP
 
         accel_x,_ = real_data.read_csv_col(file,15)
         accel_x = real_data.resample_array(accel_x,TIME_STEP) 
@@ -141,7 +141,7 @@ class Investigator:
         # set initial position and velocity of each stage
         for stage in self.stages:
             stage.position[:, 0] = self.launchsite.position_ECEF
-            stage.velocity[:, 0] = self.launchsite.initial_velocity
+            stage.velocity[:, 0] = self.launchsite.initial_velocity         # TODO: add real velocity. If you have real velocity use it, else iterate.
 
             # initial lat-long-alt and surface position calculated
             lat, long, alt = stage.get_lla(0)
@@ -407,7 +407,7 @@ class Investigator:
             # print out current solving progress to the user
             if time() - last_progress_print > 0.1:
                 percentage = round(100 * (i / N_TIME_INTERVALS))
-
+                print(f"Investigation progress: [{percentage}%]")
                 last_progress_print = time()
 
  
