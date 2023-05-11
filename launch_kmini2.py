@@ -43,16 +43,19 @@ launch_site = Launchsite(
     elevation = 85    # pointing nearly to zenith
 )
 
-rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = True, flight_data = flight_data)
+# rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = False, flight_data = flight_data)
+
+rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = False)
+
 rocket.stages = [kmini2_L]
-# rocket.run_simulation()
+rocket.run_simulation()
 
 # Save the simulated altitude and compate with real data 
 # rocket.generate_csv_altitude_vs_time()
-# rocket.plot_altitude_range()
+rocket.plot_altitude_range()
 
-dens = Atmosphere(364)
-print("this is hte density!!", dens.density)
+# dens = Atmosphere(364)
+# print("this is hte density!!", dens.density)
 
 # Wind.simulate_turbulence(20)
 # flight_data.plot_mach_cd()

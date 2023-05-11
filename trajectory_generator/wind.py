@@ -167,7 +167,7 @@ class Wind:
                                                 [x,y,z]
         """
         # Generate turbulence samples
-        samples = self.simulate_turbulence(frequency, plotting=True)
+        samples = self.simulate_turbulence(frequency, plotting=False)
 
         # Calculate turbulence magnitude
         turbulence_magnitude = np.std(samples)
@@ -278,22 +278,28 @@ class Wind:
         plt.show()
 
 
-altitudes = list(range(0,1001,10)) # altitude range 0-1000 meters
-wind = Wind(altitudes)
+# altitudes = list(range(0,1001,10)) # altitude range 0-1000 meters
+# wind = Wind(altitudes)
 
-# Generate a wind profile with altitude range from 0 to 1000 meters
-wind_profile = wind.generate_wind_profile(  altitudes,
-                                            wind_speed = 10, # at ground level
-                                            wind_dir = 'north',
-                                        turbulence_freq= 20 )
+""" Generate a wind profile with altitude range from 0 to 1000 meters """
+# wind_profile = wind.generate_wind_profile(  altitudes,
+#                                             wind_speed = 10, # at ground level
+#                                             wind_dir = 'north',
+#                                         turbulence_freq= 20 )
 
-# # Plot the wind profile in 3D
+
+
+
+
+
+
+""" Plot the wind profile in 3D """
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection='3d')
 # wind.plot_wind_profile_3d(ax, wind_profile)
 # plt.show()
 
-# # Plot the wind profile in 2D
+""" Plot the wind profile in 2D """
 # fig, ax = plt.subplots()
 # wind.plot_wind_profile_2d(ax, wind_profile)
 # plt.show()

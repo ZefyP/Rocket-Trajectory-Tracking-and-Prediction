@@ -95,7 +95,7 @@ class Rocket:
             stage.lla_vector[:, 0] = np.array([lat, long, alt])
             stage.surface_position[:, 0] = lla2ecef(lat, long, 0)
 
-        i = 0
+        i = 0 # timestamp for sim start ?
         active_stage_index = 0
         last_progress_print = time() - 10
 

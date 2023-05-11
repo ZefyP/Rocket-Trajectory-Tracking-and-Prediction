@@ -167,35 +167,35 @@ def parachute_descent_speed(area, mass, rho_air, cd): # TODO: must add account f
 
     return steady_V_z
 
+# """short script for Reynolds and Cd study for specific parachute """
+# diameter = 0.30 # 0.3 meters ~ 12 inch
+# altitudes = [100,200,500, 1000,2000,5000, 10000, 15000, 20000, 25000, 30000, 40000, 50000] # meters
+# mach_numbers = [0.1, 0.2, 0.3, 0.4, 0.5]
 
-diameter = 0.30 # 0.3 meters ~ 12 inch
-altitudes = [100,200,500, 1000,2000,5000, 10000, 15000, 20000, 25000, 30000, 40000, 50000] # meters
-mach_numbers = [0.1, 0.2, 0.3, 0.4, 0.5]
+# for altitude in altitudes:
+#     for mach in mach_numbers:
+#         # V_des = parachute_descent_speed(area, mass, rho_air, cd)
+#         Re = calculate_reynolds_number(diameter, altitude, mach)
+#         print(f"At {altitude} meters altitude and Mach {mach}, Reynolds number is {Re:.2f}")
 
-for altitude in altitudes:
-    for mach in mach_numbers:
-        # V_des = parachute_descent_speed(area, mass, rho_air, cd)
-        Re = calculate_reynolds_number(diameter, altitude, mach)
-        print(f"At {altitude} meters altitude and Mach {mach}, Reynolds number is {Re:.2f}")
-
-# Plot Reynolds number for different altitude and Mach number combinations
-fig, ax = plt.subplots(figsize=(8, 6))
-colors = ['r', 'b', 'g', 'c', 'm']
-markers = ['o', 's', 'D', '^', 'v']
-for j in range(len(mach_numbers)):
-    Re = []
-    for altitude in altitudes:
-        Re.append(calculate_reynolds_number(diameter, altitude, mach_numbers[j]))
-    f = interpolate.interp1d(altitudes, Re, kind='linear')
-    altitudes_new = np.linspace(min(altitudes), max(altitudes), num=100)
-    ax.plot(altitudes_new, f(altitudes_new), label=f'Mach {mach_numbers[j]}', color=colors[j], marker=markers[j],markersize=6, markevery=2)
-    print(f(altitudes_new))
+# # Plot Reynolds number for different altitude and Mach number combinations
+# fig, ax = plt.subplots(figsize=(8, 6))
+# colors = ['r', 'b', 'g', 'c', 'm']
+# markers = ['o', 's', 'D', '^', 'v']
+# for j in range(len(mach_numbers)):
+#     Re = []
+#     for altitude in altitudes:
+#         Re.append(calculate_reynolds_number(diameter, altitude, mach_numbers[j]))
+#     f = interpolate.interp1d(altitudes, Re, kind='linear')
+#     altitudes_new = np.linspace(min(altitudes), max(altitudes), num=100)
+#     ax.plot(altitudes_new, f(altitudes_new), label=f'Mach {mach_numbers[j]}', color=colors[j], marker=markers[j],markersize=6, markevery=2)
+#     print(f(altitudes_new))
     
-ax.set_xlabel('Altitude (m)', fontsize=12)
-ax.set_ylabel('Reynolds number', fontsize=12)
-ax.set_title('Reynolds number vs altitude and Mach number', fontsize=14)
-ax.legend(fontsize=10)
-plt.show()
+# ax.set_xlabel('Altitude (m)', fontsize=12)
+# ax.set_ylabel('Reynolds number', fontsize=12)
+# ax.set_title('Reynolds number vs altitude and Mach number', fontsize=14)
+# ax.legend(fontsize=10)
+# plt.show()
 
 
 
@@ -265,7 +265,7 @@ def plot_re_cd():
     plt.ylabel('Drag Coefficient')
     plt.show()
 
-plot_re_cd()
+# plot_re_cd()
 
 
 

@@ -2,3 +2,4 @@ output/*
 !output/.gitkeep
 .idea/
 **/__pycache__/**
+.pyc
