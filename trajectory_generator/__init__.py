@@ -9,7 +9,7 @@ from trajectory_generator.stage import *
 from trajectory_generator.rocket import *
 from trajectory_generator.wind import *
 from trajectory_generator.parachute import *
-from trajectory_generator.flight_data import *
+from trajectory_generator.real_data import *
 
 # from .main import *
 # from .constants import *

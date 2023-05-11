@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-
+# init that i have
+# init of the launch
 from .stage import Stage
 from typing import List, Callable
 import numpy as np
@@ -13,7 +14,7 @@ import matplotlib.pyplot as plt
 import pickle
 import csv
 
-from .flight_data import Flight_Data
+from .real_data import Real_Data
 
 plt.style.use("ggplot")
 
@@ -56,7 +57,7 @@ class Rocket:
                  country: str, 
                  launchsite: Launchsite,
                  use_cd_file: bool = False,
-                 flight_data: Flight_Data = None, # allow an instance of this class as an argument
+                 real_data: Real_data = None, # allow an instance of this class as an argument
                  drag_function: Callable[[List[Stage], float], float] = V2_rocket_drag_function,
                  thrust_function: Callable[[List[Stage], int], np.ndarray] = None
                  #chute_cd: Stage.parachutes(get_chute_cd())
@@ -66,7 +67,7 @@ class Rocket:
         self.country = country
         self.launchsite = launchsite
         
-        self.flight_data = flight_data
+        self.real_data = real_data
         self.use_cd_file = use_cd_file
         self.drag_function = drag_function
         self.thrust_function = thrust_function
@@ -218,7 +219,7 @@ class Rocket:
                 if mach_number is None:
                     Cd = 0
                 else:
-                    Cd = self.drag_function(stages_to_consider, mach_number, self.flight_data)
+                    Cd = self.drag_function(stages_to_consider, mach_number, self.real_data)
                 A = max([_stage.cross_sectional_area for _stage in stages_to_consider])
                 if Cd == 0:
                     # coefficient of drag = 0 corresponds to no drag
@@ -237,7 +238,7 @@ class Rocket:
                 # if mach_number is None:
                 #     chute_Cd = 0
                 # else:
-                #     chute_Cd = self.get_chute_cd(stages_to_consider, mach_number, self.flight_data)
+                #     chute_Cd = self.get_chute_cd(stages_to_consider, mach_number, self.real_data)
                 #     chute_A = Parachute.get_chute_surface_area()
                 # if chute_Cd == 0:
                 #     # coefficient of drag = 0 corresponds to no drag

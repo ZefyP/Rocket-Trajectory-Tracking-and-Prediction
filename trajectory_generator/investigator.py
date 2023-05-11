@@ -1,7 +1,22 @@
+""""
+
+TODO:
+- create a program that 
+- reconstract the gps 
+- import real accell data to calculate the real vector forces and get the last GPS estimation.
+- you don't need to do initial conditions just input it in the rocket.
+- every timestep calculate the real data and ignore the simulated.
+- once the accelleration data is finished ( due to loss in telemetry ), iterate as per a normal Rocket.simulation() with initial conditions.
+
+"""
+
+
 # -*- coding: utf-8 -*-
 import numpy as np
 from time import time
 import matplotlib.pyplot as plt
+plt.style.use("ggplot")
+
 from typing import List, Callable
 
 from .drag import *
@@ -12,6 +27,7 @@ from .stage import Stage
 from .launchsite import Launchsite
 from .rocket import Rocket
 from .atmosphere import Atmosphere
+from trajectory_generator import Real_Data
 
 
 
@@ -55,15 +71,15 @@ class Investigator:
     launchsite: Launchsite
 
     def __init__(self, name: str,
-                 timestamp: int, # edit
+                 launchsite: Launchsite,
+                 # timestamp: int, # edit
                  accel_z: float,
                  accel_x: float,
                  latest_alt: float,
                  rocket_params: Rocket = None,
                  stages: List[Stage] = [],
-                 launchsite: Launchsite = None,
                  use_cd_file: bool = False,
-                 #flight_data: Flight_Data = None, # allow an instance of this class as an argument
+                 real_data: Real_Data = None, # allow an instance of this class as an argument
                  drag_function: Callable[[List[Stage], float], float] = V2_rocket_drag_function,
                  thrust_function: Callable[[List[Stage], int], np.ndarray] = None
                  #chute_cd: Stage.parachutes(get_chute_cd())
@@ -71,16 +87,14 @@ class Investigator:
 
         self.name = name
         self.launchsite = launchsite
-        self.rocket_params = rocket_params
-        self.stages = stages
 
         # FLIGHT LOG at loss of contact
-        self.timestamp = timestamp
+        # self.timestamp = timestamp
         self.accel_z = accel_z
         self.accel_x = accel_x
         self.latest_alt = latest_alt
         
-        # self.flight_data = flight_data # real cd plot and open rocket cd arrays
+        # self.real_data = real_data # real cd plot and open rocket cd arrays
         self.use_cd_file = use_cd_file
         self.drag_function = drag_function
         self.thrust_function = thrust_function
@@ -232,7 +246,7 @@ class Investigator:
                 if mach_number is None:
                     Cd = 0
                 else:
-                    Cd = self.drag_function(stages_to_consider, mach_number, self.flight_data)
+                    Cd = self.drag_function(stages_to_consider, mach_number, self.real_data)
                 A = max([_stage.cross_sectional_area for _stage in stages_to_consider])
                 if Cd == 0:
                     # coefficient of drag = 0 corresponds to no drag
@@ -251,7 +265,7 @@ class Investigator:
                 # if mach_number is None:
                 #     chute_Cd = 0
                 # else:
-                #     chute_Cd = self.get_chute_cd(stages_to_consider, mach_number, self.flight_data)
+                #     chute_Cd = self.get_chute_cd(stages_to_consider, mach_number, self.real_data)
                 #     chute_A = Parachute.get_chute_surface_area()
                 # if chute_Cd == 0:
                 #     # coefficient of drag = 0 corresponds to no drag

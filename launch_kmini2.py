@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from trajectory_generator import Rocket, Stage, Launchsite
-from trajectory_generator import Flight_Data, Wind, drag
+from trajectory_generator import Real_Data, Wind, drag
 from trajectory_generator.constants import TIME_STEP
 from trajectory_generator.atmosphere import Atmosphere
 import os
 
-flight_data = Flight_Data(
+flight_data = Real_Data(
     name = "KarmanMini2 Relaunch Data",
     desired_sample_time = TIME_STEP,
     real_data_path = "example/Raven 4 Kmini Relaunch - Flight 1 Data  - Altitude Baro.csv",
