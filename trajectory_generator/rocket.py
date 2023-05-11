@@ -100,7 +100,7 @@ class Rocket:
         last_progress_print = time() - 10
 
         while i < N_TIME_INTERVALS - 1:
-            i += 1
+            i += 1 
 
             # active stage represents the lowest connected stage
             # i.e the stage that can currently provide thrust
@@ -116,7 +116,7 @@ class Rocket:
                     self.log(f"[{stage.name}] range is {round(stage._range[-1] / 1e3, 1)} km")
                     altitude = stage.get_lla_position_vector()[2, :]
                     apogee = np.amax(altitude)
-                    # print(len(stage.time)) # DEBUG
+                    # print(len(stage.time)) #  DEBUG
                     
                     self.log(f"[{stage.name}] Apogee is {round(apogee, 1)} m at {stage.time[-1]} seconds")
                     
