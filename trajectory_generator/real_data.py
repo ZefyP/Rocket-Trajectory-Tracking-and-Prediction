@@ -260,6 +260,24 @@ class Real_Data:
                 data_column.append(cell) # OpenRocket standard export
 
         return ( np.array(data_column), col_header )
+    
+
+    def resample_array(self,array,new_sample_time):
+
+        # Resample the data using the interpolation function
+        resampled_array = np.arange(array[0], array[-1], new_sample_time)
+        resampled_array = np.round(resampled_array, 3) # 3 decimal points
+
+        for i in range(len(resampled_array)):
+            print([resampled_array[i]]) # debug: read the resampled data
+            
+        return resampled_array
+
+
+
+
+
+# Plotting!
    
    
     def plot_csv_cols(self,filepath, col_x, col_y):

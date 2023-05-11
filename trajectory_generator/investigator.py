@@ -98,6 +98,8 @@ class Investigator:
         self.use_cd_file = use_cd_file
         self.drag_function = drag_function
         self.thrust_function = thrust_function
+        # allow the the class instance
+        self.real_data = real_data
         # Set this to False to silence solver output
         self.logging_enabled = True
 
@@ -108,8 +110,31 @@ class Investigator:
             self.drag_function = V2_rocket_drag_function
             print("--------------------------------I USED THE V2_ROCKET FUNCTION !!!")
 
+        """ Import Data Collected from Real Flight"""
+         # TR2 Recorded Flight 1 (single stage)
+        real_data = Real_Data()
+        file = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/TR2_EasyMega_Flight_Data.csv"
+        time, _ = real_data.read_csv_col(file, 3)   # remember this function returns tuple
+        time = real_data.resample_array(time,TIME_STEP) # refitted to match the simulation TIME_STEP
 
-    def run_simulation(self):
+        accel_x,_ = real_data.read_csv_col(file,15)
+        accel_x = real_data.resample_array(accel_x,TIME_STEP) 
+
+        accel_y,_ = real_data.read_csv_col(file,16)
+        accel_y = real_data.resample_array(accel_y,TIME_STEP)
+
+        accel_z,_ = real_data.read_csv_col(file,17)
+        accel_z = real_data.resample_array(accel_z,TIME_STEP)
+
+        alt_recorded,_ = real_data.read_csv_col(file,8)
+        alt_recorded = real_data.resample_array(alt_recorded,TIME_STEP) 
+
+        V_recorded,_ = real_data.read_csv_col(file,10)
+        V_recorded = real_data.resample_array(V_recorded,TIME_STEP) 
+
+
+
+    def run_investigation(self):
         # set single use flag
         looking_for_apogee = True
         apogee_time = None
