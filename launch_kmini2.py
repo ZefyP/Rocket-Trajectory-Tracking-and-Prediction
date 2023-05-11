@@ -3,7 +3,7 @@
 from trajectory_generator import Rocket, Stage, Launchsite
 from trajectory_generator import Flight_Data, Wind, drag
 from trajectory_generator.constants import TIME_STEP
-
+from trajectory_generator.atmosphere import Atmosphere
 import os
 
 flight_data = Flight_Data(
@@ -45,11 +45,14 @@ launch_site = Launchsite(
 
 rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = True, flight_data = flight_data)
 rocket.stages = [kmini2_L]
-rocket.run_simulation()
+# rocket.run_simulation()
 
 # Save the simulated altitude and compate with real data 
-rocket.generate_csv_altitude_vs_time()
-rocket.plot_altitude_range()
+# rocket.generate_csv_altitude_vs_time()
+# rocket.plot_altitude_range()
+
+dens = Atmosphere(364)
+print("this is hte density!!", dens.density)
 
 # Wind.simulate_turbulence(20)
 # flight_data.plot_mach_cd()

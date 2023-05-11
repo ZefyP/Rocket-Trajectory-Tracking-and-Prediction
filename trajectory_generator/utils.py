@@ -216,3 +216,41 @@ def fast_has_impacted_earth(ecef_coords: np.ndarray) -> bool:
 # It also simplifies calculations such as computing the dot product and determining the angle between two vectors.
 def normalise_vector(input_vector: np.ndarray):
     return input_vector / np.linalg.norm(input_vector)
+
+
+
+
+# import math
+
+# def calc_terminal_velocity(mass, area, rho, cd):
+#     g = 9.81
+#     V = math.sqrt((2 * mass * g) / (rho * area * cd))
+#     return V
+
+# def calc_lateral_drift(mass, area, rho, cd, V):
+#     g = 9.81
+#     L = (2 * mass * g) / (rho * area * cd * V**2)
+#     return L
+
+# # constants
+# rho = 1.225  # air density at sea level, kg/m^3
+# cd = 1.75    # assumed constant drag coefficient
+# diameter = 1.2  # m
+# area = math.pi * (diameter/2)**2  # m^2
+
+# # calculate terminal velocity and lateral drift for two masses
+# mass1 = 50  # kg
+# mass2 = 60  # kg
+
+# V1 = calc_terminal_velocity(mass1, area, rho, cd)
+# V2 = calc_terminal_velocity(mass2, area, rho, cd)
+
+# delta_V = abs(V1 - V2) / ((V1 + V2) / 2) * 100  # percentage difference in terminal velocity
+# print(f"Percentage difference in terminal velocity: {delta_V:.2f}%")
+
+# L1 = calc_lateral_drift(mass1, area, rho, cd, V1)
+# L2 = calc_lateral_drift(mass2, area, rho, cd, V2)
+
+# delta_L = abs(L1 - L2) / ((L1 + L2) / 2) * 100  # percentage difference in lateral drift
+# print(f"Percentage difference in lateral drift: {delta_L:.2f}%")
+

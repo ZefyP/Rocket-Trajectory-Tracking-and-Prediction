@@ -57,6 +57,11 @@ class Wind:
             # i.e. every 50th sample to simulate turbulence at 20 Hz.
             # Extract samples i.e.at 20 Hz
             samples = pink_noise[::int(1000/frequency)]
+
+            # Apply absolute function to ensure all values are positive
+            samples = np.abs(samples)
+            # Normalise the data to lie between 0 and 1.
+            samples = samples / np.max(samples)
             
             # Reshape into a 2-dimensional array: [no of samples, no of channels]: [samples,1]
             samples = samples.reshape(-1,1)
@@ -162,7 +167,7 @@ class Wind:
                                                 [x,y,z]
         """
         # Generate turbulence samples
-        samples = self.simulate_turbulence(frequency, plotting=False)
+        samples = self.simulate_turbulence(frequency, plotting=True)
 
         # Calculate turbulence magnitude
         turbulence_magnitude = np.std(samples)
