@@ -113,20 +113,37 @@ class Investigator:
             self.drag_function = V2_rocket_drag_function
             print("--------------------------------I USED THE V2_ROCKET FUNCTION !!!")
 
+    "Compute the key event times of flight."
+    def get_stage_separation_times(stages):
+        separation_times = []
+        total_separation_time = 0  # initialize total separation time to 0
+        for stage in stages:
+            if stage.separation_lag is not None:
+                separation_time = stage.burn_time + stage.separation_lag  # separation time is burn time plus lag time
+                total_separation_time += separation_time  # add separation time to total separation time
+                separation_times.append(total_separation_time)  # append total separation time to list of separation times
+            else:
+                separation_times.append(None)  # if there is no separation lag, append None to list of separation times
+        return separation_times
+
 
     
     def get_flight_state(self, stages, last_timestamp):
-        active_stage = None
+        active_stage = []
         stage_start_time = 0
         for stage in stages:
             stage_end_time = stage_start_time + stage.burn_time
+            # if the motor is burnt out, stages have separated
             if last_timestamp < stage_end_time:
                 active_stage = stage
                 break
+            # start of the new stage is the end of previous + lag time 
             stage_start_time = stage_end_time + stage.separation_lag if stage.separation_lag is not None else stage_end_time
         if active_stage is None:
             # Rocket has landed
             return None
+        
+        # stage timer
         stage_time = last_timestamp - active_stage.start_time
         # get burn rate using stage data
         burn_rate = stage.fuel_mass / active_stage.burn_time
@@ -135,8 +152,8 @@ class Investigator:
         # TODO: get total mass from Stage?
         stage_mass = active_stage.total_mass - stage_fuel_consumed
         stage_thrust = active_stage.max_thrust if stage_time < stage.burn_time else 0
-        
-        return RocketStageState(active_stage, last_timestamp, stage_mass, stage_thrust)
+
+        return FlightState(active_stage, last_timestamp, stage_mass, stage_thrust)
 
 
     def calculate_properties(accel_x,accel_y,accel_z,altitude,timestamp):
