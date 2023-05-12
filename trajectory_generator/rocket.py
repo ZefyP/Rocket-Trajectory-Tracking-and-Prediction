@@ -96,6 +96,8 @@ class Rocket:
             stage.lla_vector[:, 0] = np.array([lat, long, alt])
             stage.surface_position[:, 0] = lla2ecef(lat, long, 0)
 
+            # initialise the 
+            stage.separation_lat_long = []
         i = 0 # timestamp for sim start ?
         active_stage_index = 0
         last_progress_print = time() - 10
@@ -319,6 +321,16 @@ class Rocket:
                     if active_stage.burn_time + active_stage.separation_time < engine_burn_time and active_stage != upper_stage:
                         self.log(f"[{self.name}] [{stage.time[i]}] Stage {active_stage.name} separated!")
                         active_stage.has_separated = True
+                        lat,long,alt = stage.get_lla(i-1)
+                        # save separation position
+                        # stage.separation_lla[:, i] = stage.position[:, i]
+                        stage.separation_lla[0,i-1] = lat
+                        stage.separation_lla[1,i-1] = long
+                        stage.separation_lla[2,i-1] = alt
+                        self.log(f"[{self.name}] location {lat}, {long}, {alt}")
+                        
+
+
                         active_stage_index += 1
 
                 # calculate decrease in mass due to fuel burn

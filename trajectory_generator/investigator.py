@@ -119,19 +119,24 @@ class Investigator:
         active_stage = None
         stage_start_time = 0
         for stage in stages:
-            stage_end_time = stage_start_time+ stage.burn_time
+            stage_end_time = stage_start_time + stage.burn_time
             if last_timestamp < stage_end_time:
-                current_stage = stage
+                active_stage = stage
                 break
             stage_start_time = stage_end_time + stage.separation_lag if stage.separation_lag is not None else stage_end_time
-        if current_stage is None:
+        if active_stage is None:
             # Rocket has landed
             return None
-        stage_time = last_timestamp - stage_start_time
-        stage_mass = current_stage.motor_burn_rate * (stage_time if stage_time < stage.burn_time else stage.burn_time)
-        stage_thrust = current_stage.max_thrust if stage_time < stage.burn_time else 0
+        stage_time = last_timestamp - active_stage.start_time
+        # get burn rate using stage data
+        burn_rate = stage.fuel_mass / active_stage.burn_time
+        # fuel consumed until now
+        stage_fuel_consumed = active_stage.burn_time
+        # TODO: get total mass from Stage?
+        stage_mass = active_stage.total_mass - stage_fuel_consumed
+        stage_thrust = active_stage.max_thrust if stage_time < stage.burn_time else 0
         
-        return RocketStageState(current_stage, last_timestamp, stage_mass, stage_thrust)
+        return RocketStageState(active_stage, last_timestamp, stage_mass, stage_thrust)
 
 
     def calculate_properties(accel_x,accel_y,accel_z,altitude,timestamp):
