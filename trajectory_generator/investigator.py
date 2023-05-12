@@ -95,6 +95,7 @@ class Investigator:
         self.accel_z = accel_z
         self.accel_x = accel_x
         self.latest_alt = latest_alt
+        # self.timestamp = timestamp
         
         # self.real_data = real_data # real cd plot and open rocket cd arrays
         self.use_cd_file = use_cd_file
@@ -113,11 +114,31 @@ class Investigator:
             print("--------------------------------I USED THE V2_ROCKET FUNCTION !!!")
 
 
+    
+    def get_flight_state(self, stages, last_timestamp):
+        active_stage = None
+        stage_start_time = 0
+        for stage in stages:
+            stage_end_time = stage_start_time+ stage.burn_time
+            if last_timestamp < stage_end_time:
+                current_stage = stage
+                break
+            stage_start_time = stage_end_time + stage.separation_lag if stage.separation_lag is not None else stage_end_time
+        if current_stage is None:
+            # Rocket has landed
+            return None
+        stage_time = last_timestamp - stage_start_time
+        stage_mass = current_stage.motor_burn_rate * (stage_time if stage_time < stage.burn_time else stage.burn_time)
+        stage_thrust = current_stage.max_thrust if stage_time < stage.burn_time else 0
+        
+        return RocketStageState(current_stage, last_timestamp, stage_mass, stage_thrust)
+
+
     def calculate_properties(accel_x,accel_y,accel_z,altitude,timestamp):
         try:
             atmosphere = Atmosphere(altitude)
-        except ValueError: atmosphere = None
-        state, active_stage = get_flight_state(timestamp)
+        except ValueError: atmosphere = None # no atmosphere
+        state, active_stage = self.get_flight_state(stages, timestamp)
         # Calc mass
         stage.fuel_mass_vector[i] = stage.fuel_mass
         mass = stage.total_mass

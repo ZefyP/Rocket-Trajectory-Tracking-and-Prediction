@@ -228,7 +228,7 @@ class Rocket:
                 else:
                     velocity = stage.velocity[:, i - 1]
                     velocity_magnitude = np.sqrt(velocity.dot(velocity))            # TODO: can we use the magnitude but estimate the direction?
-                    print("                         GET VEL ", velocity, velocity_magnitude)
+                    # print("                         GET VEL ", velocity, velocity_magnitude)
                     if velocity_magnitude != 0:
                         drag_direction = - normalise_vector(stage.velocity[:, i - 1])
                     else:
