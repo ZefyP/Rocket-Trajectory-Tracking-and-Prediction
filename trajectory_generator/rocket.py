@@ -209,13 +209,14 @@ class Rocket:
                 else:
                     # otherwise assume that the thrust is oriented in the 
                     # same direction as the current velocity
-                    thrust_vector = thrust_magnitude * normalise_vector(stage.velocity[:, i - 1])
+                    thrust_vector = thrust_magnitude * normalise_vector(stage.velocity[:, i - 1]) # TODO: the thrust vector will be innacurate if i don't set a velocity vector based on the velocity magnitude recorded.
 
                 # determine gravity vector
                 gravity_vector = stage.get_gravity_vector(i - 1, mass)
 
                 # determine drag vector
                 mach_number = stage.get_mach_number(i, atmosphere)
+                # print("GET MACH ", mach_number) # DEBUG
                 if mach_number is None:
                     Cd = 0
                 else:
@@ -226,7 +227,8 @@ class Rocket:
                     drag_vector = np.array([0, 0, 0]) # pos neg pos
                 else:
                     velocity = stage.velocity[:, i - 1]
-                    velocity_magnitude = np.sqrt(velocity.dot(velocity))
+                    velocity_magnitude = np.sqrt(velocity.dot(velocity))            # TODO: can we use the magnitude but estimate the direction?
+                    print("                         GET VEL ", velocity, velocity_magnitude)
                     if velocity_magnitude != 0:
                         drag_direction = - normalise_vector(stage.velocity[:, i - 1])
                     else:
@@ -323,7 +325,7 @@ class Rocket:
                 if thrust_magnitude > 0:
                     active_stage.fuel_mass -= (thrust_magnitude * dt) / (GRAVITY * active_stage.specific_impulse)
                     active_stage.total_mass = active_stage.dry_mass + active_stage.fuel_mass
-
+                
                 if altitude < 0 and stage.time[i - 1] > 1:
                     # if the upper stage hits the ground before the other stages are done solving, truncate those as well
                     if stage == upper_stage:
@@ -351,6 +353,8 @@ class Rocket:
                         _stage.time = stage.time[0:i]
                         _stage.fuel_mass_vector = stage.fuel_mass_vector[0:i]
                         _stage.has_impacted_ground = True
+
+                        
 
             # print out current solving progress to the user
             if time() - last_progress_print > 0.1:

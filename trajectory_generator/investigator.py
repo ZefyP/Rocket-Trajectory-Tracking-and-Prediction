@@ -29,6 +29,8 @@ from .rocket import Rocket
 from .atmosphere import Atmosphere
 from .real_data import Real_Data
 
+from math import sin, cos
+
 
 
 class Investigator:
@@ -110,13 +112,47 @@ class Investigator:
             self.drag_function = V2_rocket_drag_function
             print("--------------------------------I USED THE V2_ROCKET FUNCTION !!!")
 
+
+    def calculate_properties(accel_x,accel_y,accel_z,altitude,timestamp):
+        try:
+            atmosphere = Atmosphere(altitude)
+        except ValueError: atmosphere = None
+        state, active_stage = get_flight_state(timestamp)
+        # Calc mass
+        stage.fuel_mass_vector[i] = stage.fuel_mass
+        mass = stage.total_mass
+        # Calculate thrust vector
+        if i > 100 and np.all(stage.speed[:, 0] == 0):
+            # The rocket might have landed.
+            thrust = np.array([0, 0, 0])
+        elif stage.has_separated:
+            # The stage has separated, so there is no thrust
+            thrust = np.array([0, 0, 0])
+        else:
+            # The stage is still attached and may have thrust
+            if stage == self.stages[-1]:
+                # This is the upper stage, so determine the amount of time
+                # that the engine has been burning for
+                engine_burn_time = stage.time[i] - stage.burn_start_time
+                
+                # Determine the thrust of the current active stage
+                thrust_magnitude = 0
+                if stage.fuel_mass >= 0:
+                    if engine_burn_time < stage.burn_time:
+                        thrust_magnitude = stage.thrust
+
+        
+
+       
+    def load_real_data(self):
         """ Import Data Collected from Real Flight"""
-         # TR2 Recorded Flight 1 (single stage)
+        # TR2 Recorded Flight 1 (single stage)
         real_data = Real_Data()
         file = "C:/ergasia/projects/Rocket-Trajectory-Tracking-and-Prediction/example/TR2_EasyMega_Flight_Data.csv"
+        # time data
         time_rec, _ = real_data.read_csv_col(file, 3)   # remember this function returns tuple
         time_rec = real_data.resample_array(time_rec,TIME_STEP) # refitted to match the simulation TIME_STEP
-
+        # acceleration data for the x, y, and z axes
         accel_x,_ = real_data.read_csv_col(file,15)
         accel_x = real_data.resample_array(accel_x,TIME_STEP) 
 
@@ -126,11 +162,75 @@ class Investigator:
         accel_z,_ = real_data.read_csv_col(file,17)
         accel_z = real_data.resample_array(accel_z,TIME_STEP)
 
+        # altitude
         alt_recorded,_ = real_data.read_csv_col(file,8)
         alt_recorded = real_data.resample_array(alt_recorded,TIME_STEP) 
-
+        # velocity
         V_recorded,_ = real_data.read_csv_col(file,10)
         V_recorded = real_data.resample_array(V_recorded,TIME_STEP) 
+
+        photograph = calculate_properties(accel_x,accel_y,accel_z,i)
+
+
+    def calculate_fuel_mass(timestamp, fuel_mass, burn_rate):
+        initial_timestamp = 0
+        time_elapsed = timestamp - initial_timestamp
+        fuel_mass = fuel_mass - burn_rate * time_elapsed
+
+        return max(0, fuel_mass) # Ensure fuel mass is never negative
+    
+
+
+    def calculate_position_vector(starting_point, direction, acceleration_x, acceleration_y, acceleration_z, time_elapsed):
+        lat, lon, alt = starting_point
+        phi = direction # phi is the angle between the direction of motion and the equator
+        r = alt # r is the distance from the center of the earth
+        theta = lon # theta is the angle between the direction of motion and the prime meridian
+        
+        # Calculate the new position
+        new_lat = lat + r * cos(phi) * cos(theta) * time_elapsed
+        new_lon = lon + r * cos(phi) * sin(theta) * time_elapsed
+        new_alt = alt + r * sin(phi) * time_elapsed
+        lla = lla[0]
+        
+        # Update the velocity based on the acceleration
+        vel_x = acceleration_x * time_elapsed
+        vel_y = acceleration_y * time_elapsed
+        vel_z = acceleration_z * time_elapsed
+        velocity = np.array[vel_x,vel_y,vel_z]
+        
+        return (new_lat, new_lon, new_alt), velocity
+
+
+
+        # Copy the data from the real stages into the simulation stages
+        for i, stage in enumerate(self.stages):
+            stage.position[:, :len(real_stages[i].position[0])] = real_stages[i].position
+            stage.velocity[:, :len(real_stages[i].velocity[0])] = real_stages[i].velocity
+            stage.lla_vector[:, :len(real_stages[i].lla_vector[0])] = real_stages[i].lla_vector
+            stage.surface_position[:, :len(real_stages[i].surface_position[0])] = real_stages[i].surface_position
+            stage.burn_start_time = real_stages[i].burn_start_time
+            stage.fuel_mass = real_stages[i].fuel_mass
+            stage.fuel_mass_vector[:len(real_stages[i].fuel_mass_vector)] = real_stages[i].fuel_mass_vector
+            stage.has_separated = real_stages[i].has_separated
+            stage.has_impacted_ground = real_stages[i].has_impacted_ground
+
+        
+
+
+
+
+        # calculate velocity using the trapezoidal rule
+        vx = np.cumsum((ax[:-1] + ax[1:]) / 2 * np.diff(t))
+        vy = np.cumsum((ay[:-1] + ay[1:]) / 2 * np.diff(t))
+        vz = np.cumsum((az[:-1] + az[1:]) / 2 * np.diff(t))
+
+        # calculate position using the trapezoidal rule
+        x = np.cumsum((vx[:-1] + vx[1:]) / 2 * np.diff(t))
+        y = np.cumsum((vy[:-1] + vy[1:]) / 2 * np.diff(t))
+        z = np.cumsum((vz[:-1] + vz[1:]) / 2 * np.diff(t))
+
+
 
 
 
@@ -153,6 +253,8 @@ class Investigator:
         last_progress_print = time() - 10
 
         while i < N_TIME_INTERVALS - 1:
+            if i in REAL_DATA_TIME_INTERVALS:
+                self.load_real_data(i)
             i += 1 
 
             # active stage represents the lowest connected stage
@@ -251,7 +353,7 @@ class Investigator:
                     atmosphere = None
 
                 # determine thrust vector
-                if i == 1 and np.all(stage.velocity[:, 0] == 0):
+                if i == 1 and np.all(stage.velocity[:, 0] == 0):    # TODO  use real velocity 
                     # if on the launch pad then the thrust is oriented in the 
                     # same direction as the launchsite
                     # unless the stage has an initial velocity
@@ -285,27 +387,6 @@ class Investigator:
                         drag_direction = 0
                     drag_vector = 1 / 2 * atmosphere.density * A * Cd * velocity_magnitude ** 2 * drag_direction
                     # self.log(f"[{self.name}] [{stage.time[i]}] DRAG {active_stage.name} with vector  {drag_vector} ") # ---------------
-
-                #     """Determine the parachute drag vector"""
-                # if mach_number is None:
-                #     chute_Cd = 0
-                # else:
-                #     chute_Cd = self.get_chute_cd(stages_to_consider, mach_number, self.real_data)
-                #     chute_A = Parachute.get_chute_surface_area()
-                # if chute_Cd == 0:
-                #     # coefficient of drag = 0 corresponds to no drag
-                #     chute_drag_vector = np.array([0, 0, 0]) # pos neg pos
-                # else:
-                #     velocity = stage.velocity[:, i - 1]
-                #     velocity_magnitude = np.sqrt(velocity.dot(velocity))
-                #     if velocity_magnitude != 0:
-                #         chute_drag_direction = - normalise_vector(stage.velocity[:, i - 1])
-                #     else:
-                #         drag_direction = 0
-                #     chute_drag_magnitude = 1 / 2 * atmosphere.density * chute_A * chute_Cd * velocity_magnitude ** 2
-                #     chute_drag_vector = -1 * chute_drag_magnitude * chute_drag_direction
-
-
                 # calculate centrifugal force
 
                 # omega represents rotation vector pointed along Z axis

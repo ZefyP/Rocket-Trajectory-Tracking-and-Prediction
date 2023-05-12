@@ -160,12 +160,17 @@ class Stage:
         if atmosphere is None:
             return None
         current_velocity = self.velocity[:, velocity_index]
+        # print("GET VEL ", velocity_index, current_velocity)
 
         velocity_magnitude = np.sqrt(
             current_velocity.dot(current_velocity)
         )
-        # mach number is the ratio of velocity magn to the speed of sound in the atmosphere
+        # mach number is the ratIo of velocity magn to the speed of sound in the atmosphere
         mach_number = velocity_magnitude / atmosphere.speed_of_sound
+        # print("GET MACH ", mach_number, current_velocity, velocity_magnitude) # DEBUG
+        # print ("a=", atmosphere.speed_of_sound) # DEBUG
+        # print("v=", self.velocity[:, velocity_index]) # DEBUG
+        #print("i=",velocity_index)
         return mach_number
 
     def get_gravity_vector(self, position_index, mass):
