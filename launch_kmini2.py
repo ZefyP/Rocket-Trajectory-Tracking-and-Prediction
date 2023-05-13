@@ -54,9 +54,9 @@ rocket.run_simulation()
 """ Test the rocket landing spot method """
 wind = Wind(255) 
 #rocket = Rocket(apogee=1000, apogee_direction=90)  # apogee of 10000 feet, direction straight up
-landing_spot = wind.land_spot()
-print(landing_spot)  # prints the x and y coordinates of the landing spot
-
+#landing_spot = wind.land_spot()
+#print(landing_spot)  # prints the x and y coordinates of the landing spot
+wind.landing_area()
 
 
 # Save the simulated altitude and compate with real data 

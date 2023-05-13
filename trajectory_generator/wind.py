@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 import warnings
 import math
 
-import time
+import time # timeout
+import random # monte carlo sim
+from mpl_toolkits.basemap import Basemap # TODO: add to requirements,txt 
 from mpl_toolkits.mplot3d import Axes3D
 
 
@@ -284,21 +286,21 @@ class Wind:
     # stage.apogee_position = []
     
 
-    wind_speed=10.0          # test
+    wind_speed=1.0          # test
     wind_direction= 45.0       # test
-    position = [10,10, 10]  # test
-    apogee_direction = 90.0   # test
+    position = [53.38165675,-1.4821555953306795, 10]  # drop test from Sheffield coordinates
+    apogee_direction = 45.0   # test
     
-    def descent_vector(self):
+    def descent_vector(self,wind_speed,wind_direction):
         # deg to rad
-        wind_direction_radians = math.radians(self.wind_direction)
+        wind_direction_radians = math.radians(wind_direction)
         print("wind_direction_radians:", wind_direction_radians)
-        print("wind_speed:", self.wind_speed)
+        print("wind_speed:", wind_speed)
         print("apogee_direction:", self.apogee_direction)
         # x and y components are based on the wind speed and direction, 
         # the z component is based on the rocket's apogee direction and position.
-        x = -math.sin(wind_direction_radians) * self.wind_speed
-        y = -math.cos(wind_direction_radians) * self.wind_speed
+        x = -math.sin(wind_direction_radians) * wind_speed
+        y = -math.cos(wind_direction_radians) * wind_speed
         z = -self.position[2] / math.tan(math.radians(self.apogee_direction))
         x = round(x, 2)
         y = round(y, 2)
@@ -321,29 +323,87 @@ class Wind:
 
         
         return self.position[:]
-        
-    def land_spot(self,timeout=1):
-        landing_spot = tuple(self.position[:2])
-        altitude = self.position[2]
+    
+
+    def landing_area(self, timeout=20, num_trials=10):
+        landing_spots = []
+        altitudes = []
         start_time = time.time()
 
-        # iteravely update the rocket's position
-        while altitude >= 0:
-            # check if timeout has been reached
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= timeout:
-                print(f"Timeout reached after {timeout} seconds")
-                break
-            descent = self.descent_vector()
-            self.position[0] += descent[0]
-            self.position[1] += descent[1]
-            self.position[2] += descent[2]
-            altitude -= descent[2]
-            landing_spot = tuple(self.position[:2])
+        for i in range(num_trials):
+            # calculate wind speed and direction using Monte Carlo simulation
+            wind_speed_mc = random.normalvariate(self.wind_speed, self.wind_speed * 0.1)
+            wind_direction_mc = random.normalvariate(self.wind_direction, 2) # deviation 2
 
-        print(f"Rocket landed! Landing cooridnates: {landing_spot}")
-        return landing_spot
-    
+            position = self.position[:]
+            altitude = position[2]
+
+            # iteratively update the rocket's position
+            while altitude >= 0:
+                # check if timeout has been reached
+                elapsed_time = time.time() - start_time
+                if elapsed_time >= timeout:
+                    print(f"Timeout reached after {timeout} seconds")
+                    break
+
+                descent = self.descent_vector(wind_speed_mc,wind_direction_mc)
+                position[0] += descent[0]
+                position[1] += descent[1]
+                position[2] += descent[2]
+                altitude -= descent[2]
+
+            landing_spot = tuple(position[:2])
+            landing_spots.append(landing_spot)
+            altitudes.append(position[2])
+
+        print(f"Rocket landed! Spot: {landing_spots} Number of trials: {num_trials}")
+        print(f"Minimum altitude: {min(altitudes)}")
+        print(f"Maximum altitude: {max(altitudes)}")
+
+        # generate scatter plot of landing coordinates and altitudes
+        # fig, ax = plt.subplots()
+        # scatter = ax.scatter([x[0] for x in landing_spots], [x[1] for x in landing_spots], c=altitudes, cmap='cool')
+        # ax.set_title("Landing Coordinates")
+        # ax.set_xlabel("X Coordinate")
+        # ax.set_ylabel("Y Ccordinate")
+        # plt.show()
+        
+                
+                # get the minimum and maximum latitudes and longitudes of the landing spots
+        min_lat = min([spot[0] for spot in landing_spots])
+        max_lat = max([spot[0] for spot in landing_spots])
+        min_lon = min([spot[1] for spot in landing_spots])
+        max_lon = max([spot[1] for spot in landing_spots])
+
+        # set the map limits to the range of the landing spots
+        padding = 0.1  # add a padding of 10% to the map limits
+        mllat = min_lat - padding * abs(max_lat - min_lat)
+        mllon = min_lon - padding * abs(max_lon - min_lon)
+        mrlat = max_lat + padding * abs(max_lat - min_lat)
+        mrlon = max_lon + padding * abs(max_lon - min_lon)
+
+         # create the basemap object with the adjusted map limits
+        m = Basemap(projection='mill', llcrnrlat=mllat, urcrnrlat=mrlat, \
+                    llcrnrlon=mllon, urcrnrlon=mrlon, resolution='c')
+
+
+        m.drawcoastlines()
+        m.drawcountries()
+        m.fillcontinents(color='white',lake_color='aqua')
+        m.drawmapboundary(fill_color='aqua')
+        x, y = m([spot[1] for spot in landing_spots], [spot[0] for spot in landing_spots])
+        
+        for i, spot in enumerate(landing_spots):
+            plt.annotate(str(i+1), xy=(x[i], y[i]), xytext=(5, 5), textcoords='offset points')
+
+        m.scatter(x, y, s=5, marker='o', color='r')
+
+       
+
+        plt.title("Landing Coordinates")
+        plt.show()
+
+        return landing_spots
 
 """ Generate a wind profile with altitude range from 0 to 1000 meters """
 
