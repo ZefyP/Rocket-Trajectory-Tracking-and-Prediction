@@ -52,7 +52,7 @@ rocket.run_simulation()
 
 # Save the simulated altitude and compate with real data 
 # rocket.generate_csv_altitude_vs_time()
-rocket.plot_altitude_range()
+# rocket.plot_altitude_range()
 
 # dens = Atmosphere(364)
 # print("this is hte density!!", dens.density)

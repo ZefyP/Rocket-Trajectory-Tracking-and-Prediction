@@ -142,6 +142,9 @@ class Stage:
         self.surface_position = np.zeros((3, N_TIME_INTERVALS))
         self._range = np.zeros((N_TIME_INTERVALS,))
         self.fuel_mass_vector[0] = self.fuel_mass
+        # Store important events
+        self.separation_lla = np.zeros((3,N_TIME_INTERVALS))
+        self.apogee_lla = np.zeros((3,N_TIME_INTERVALS))
 
     def get_lla(self, position_index):
         position = self.position[:, position_index]

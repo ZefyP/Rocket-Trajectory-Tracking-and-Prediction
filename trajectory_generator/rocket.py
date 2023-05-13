@@ -82,9 +82,6 @@ class Rocket:
 
 
     def run_simulation(self):
-        # set single use flag
-        looking_for_apogee = True
-        apogee_time = None
         # set initial position and velocity of each stage
         for stage in self.stages:
             stage.position[:, 0] = self.launchsite.position_ECEF
@@ -94,6 +91,7 @@ class Rocket:
             lat, long, alt = stage.get_lla(0)
             stage.lla_vector[:, 0] = np.array([lat, long, alt])
             stage.surface_position[:, 0] = lla2ecef(lat, long, 0)
+            looking_for_apogee = True
 
         i = 0 # timestamp for sim start ?
         active_stage_index = 0
@@ -270,21 +268,13 @@ class Rocket:
                 acceleration = sum_forces / mass
                 
                 dt = stage.time[i] - stage.time[i - 1]
-                
-                # apogee time
-                if looking_for_apogee==True and i>10:
-                    prev_alt = stage.get_lla_position_vector()[2, i - 2]
-                    current_alt = stage.get_lla_position_vector()[2, i-1]
-                    if prev_alt > current_alt:
-                        apogee_time = stage.time[i-1]
-                        # self.log(f"-----------------------------------Apogee detected at time [{apogee_time}]{prev_alt}]{current_alt}].") # DEBUG
-                        looking_for_apogee = False           
+                      
 
                 # propagate forward velocity and position based on current acceleration
                 stage.acceleration[:, i] = np.copy(acceleration)
                 stage.velocity[:, i] = stage.velocity[:, i - 1] + acceleration * dt
-                stage.position[:, i] = stage.position[:, i - 1] + stage.velocity[:, i] * dt
-
+                stage.position[:, i] = stage.position[:, i - 1] + stage.velocity[:, i] * dt 
+                        
                 # update data stores of other useful variables about the flight
                 stage.drag_vectors[:, i] = drag_vector
                 stage.thrust_vectors[:, i] = thrust_vector
@@ -315,13 +305,34 @@ class Rocket:
                     engine_burn_time = active_stage.time[i] - active_stage.burn_start_time
                     if active_stage.burn_time + active_stage.separation_time < engine_burn_time and active_stage != upper_stage:
                         self.log(f"[{self.name}] [{stage.time[i]}] Stage {active_stage.name} separated!")
+                        # Store this stage's separation coordinates and time
+                        stage.separation_lla[0,i-1] = lat
+                        stage.separation_lla[1,i-1] = long
+                        stage.separation_lla[2,i-1] = alt
+                        self.log(f"[{self.name}] location {lat}, {long}, {alt}")
                         active_stage.has_separated = True
-                        active_stage_index += 1
+                        active_stage_index += 1 
+                        looking_for_apogee = True # start looking for apogee of the new stage
 
                 # calculate decrease in mass due to fuel burn
                 if thrust_magnitude > 0:
                     active_stage.fuel_mass -= (thrust_magnitude * dt) / (GRAVITY * active_stage.specific_impulse)
                     active_stage.total_mass = active_stage.dry_mass + active_stage.fuel_mass
+
+
+                # Store each stage apogee coordinates
+                if looking_for_apogee==True:
+                    _,_,prev_alt = stage.get_lla(i-1)
+                    current_lat,current_long,current_alt = stage.get_lla(i)
+                    if prev_alt > current_alt:
+                        # Store the separation position and time
+                        stage.apogee_lla[0,i-1] = current_lat
+                        stage.apogee_lla[1,i-1] = current_long
+                        stage.apogee_lla[2,i-1] = round(current_alt, 1)
+                        # self.log(f"[{self.name}] ----- Apogee LLA: { stage.apogee_lla[:,i-1]}") # DEBUG
+                        # stage.apogee_lla = stage.time[i-1]
+                        looking_for_apogee = False    
+
 
                 if altitude < 0 and stage.time[i - 1] > 1:
                     # if the upper stage hits the ground before the other stages are done solving, truncate those as well
