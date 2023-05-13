@@ -50,6 +50,15 @@ rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = False)
 rocket.stages = [kmini2_L]
 rocket.run_simulation()
 
+
+""" Test the rocket landing spot method """
+wind = Wind(255) 
+#rocket = Rocket(apogee=1000, apogee_direction=90)  # apogee of 10000 feet, direction straight up
+landing_spot = wind.land_spot()
+print(landing_spot)  # prints the x and y coordinates of the landing spot
+
+
+
 # Save the simulated altitude and compate with real data 
 # rocket.generate_csv_altitude_vs_time()
 # rocket.plot_altitude_range()

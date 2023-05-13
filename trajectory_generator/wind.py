@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import warnings
 import math
 
+import time
 from mpl_toolkits.mplot3d import Axes3D
 
 
@@ -25,6 +26,8 @@ Adding methods to plot the wind profile in 3D and 2D.
 """
 
 class Wind:
+
+
     def __init__(self, altitude):
         self.atmosphere = Atmosphere(altitude)
         # self.layer = Atmosphere._get_layer_nums()
@@ -277,20 +280,81 @@ class Wind:
             plt.quiver(0, 0, vector[0], vector[1], scale=100)
         plt.show()
 
+    # stage.apogee_direction = []
+    # stage.apogee_position = []
+    
+
+    wind_speed=10.0          # test
+    wind_direction= 45.0       # test
+    position = [10,10, 255]  # test
+    apogee_direction = 90.0   # test
+    
+    def descent_vector(self):
+        # deg to rad
+        wind_direction_radians = math.radians(self.wind_direction)
+        print("wind_direction_radians:", wind_direction_radians)
+        print("wind_speed:", self.wind_speed)
+        print("apogee_direction:", self.apogee_direction)
+        # x and y components are based on the wind speed and direction, 
+        # the z component is based on the rocket's apogee direction and position.
+        x = -math.sin(wind_direction_radians) * self.wind_speed
+        y = -math.cos(wind_direction_radians) * self.wind_speed
+        z = -self.position[2] / math.tan(math.radians(self.apogee_direction))
+        x = round(x, 2)
+        y = round(y, 2)
+        z = round(z, 2)
+        print("x:", x)
+        print("y:", y)
+        print("z:", z)
+        
+        magnitude = math.sqrt(x**2 + y**2 + z**2)
+        x = x / magnitude
+        y = y / magnitude
+        z = z / magnitude
+
+        # update x and y components based on current position
+        # x += self.position[0]
+        # y += self.position[1]
+        x *= self.wind_speed
+        y *= self.wind_speed
+
+        
+        return [x ,y, z]
+        
+    def land_spot(self,timeout=0.5):
+        landing_spot = tuple(self.position[:2])
+        start_time = time.time()
+
+         # check if rocket is already at or below zero
+        if self.position[2] <= 0:
+            print(f"rocket is already on ground: {landing_spot}")
+            return landing_spot
+        # iteravely update the rocket's position
+        while self.position[2] > 0:
+
+            # check if timeout has been reached
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= timeout:
+                print(f"Timeout reached after {timeout} seconds")
+                break
+            descent = self.descent_vector()
+            self.position[0] += descent[0]
+            self.position[1] += descent[1]
+            self.position[2] += descent[2]
+            landing_spot = tuple(self.position[:2])
+            print(f"Landing cooridnates: {landing_spot}")
+        return landing_spot
+    
+
+""" Generate a wind profile with altitude range from 0 to 1000 meters """
 
 # altitudes = list(range(0,1001,10)) # altitude range 0-1000 meters
 # wind = Wind(altitudes)
 
-""" Generate a wind profile with altitude range from 0 to 1000 meters """
 # wind_profile = wind.generate_wind_profile(  altitudes,
 #                                             wind_speed = 10, # at ground level
 #                                             wind_dir = 'north',
 #                                         turbulence_freq= 20 )
-
-
-
-
-
 
 
 """ Plot the wind profile in 3D """
