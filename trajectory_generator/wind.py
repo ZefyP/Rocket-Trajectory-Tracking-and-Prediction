@@ -286,7 +286,7 @@ class Wind:
 
     wind_speed=10.0          # test
     wind_direction= 45.0       # test
-    position = [10,10, 255]  # test
+    position = [10,10, 10]  # test
     apogee_direction = 90.0   # test
     
     def descent_vector(self):
@@ -313,25 +313,22 @@ class Wind:
         z = z / magnitude
 
         # update x and y components based on current position
-        # x += self.position[0]
-        # y += self.position[1]
-        x *= self.wind_speed
-        y *= self.wind_speed
+        self.position[0] += x
+        self.position[1] += y
+        self.position[2] += z
+        # x *= self.wind_speed
+        # y *= self.wind_speed
 
         
-        return [x ,y, z]
+        return self.position[:]
         
-    def land_spot(self,timeout=0.5):
+    def land_spot(self,timeout=1):
         landing_spot = tuple(self.position[:2])
+        altitude = self.position[2]
         start_time = time.time()
 
-         # check if rocket is already at or below zero
-        if self.position[2] <= 0:
-            print(f"rocket is already on ground: {landing_spot}")
-            return landing_spot
         # iteravely update the rocket's position
-        while self.position[2] > 0:
-
+        while altitude >= 0:
             # check if timeout has been reached
             elapsed_time = time.time() - start_time
             if elapsed_time >= timeout:
@@ -341,8 +338,10 @@ class Wind:
             self.position[0] += descent[0]
             self.position[1] += descent[1]
             self.position[2] += descent[2]
+            altitude -= descent[2]
             landing_spot = tuple(self.position[:2])
-            print(f"Landing cooridnates: {landing_spot}")
+
+        print(f"Rocket landed! Landing cooridnates: {landing_spot}")
         return landing_spot
     
 
