@@ -6,6 +6,7 @@ from trajectory_generator.stage import Stage
 import numpy as np
 import scipy.signal as signal
 import matplotlib.pyplot as plt
+from  matplotlib.patches import Circle
 import warnings
 import math
 
@@ -43,7 +44,7 @@ class Wind:
             frequency (float): The frequency (per second) at which to extract samples from the pink noise.
 
         Returns:
-            None
+            samples (ndarray)
         """
         # Generate white noise with 10000 samples
         white_noise = np.random.randn(10000)
@@ -116,7 +117,7 @@ class Wind:
         Returns:
             wind_dir (np.ndarray): A 3D wind direction vector.
                                     [x,y,z]
-        # TODO: Improvet to direction based on 360 deg to rad
+        # TODO: Improve to direction based on 360 deg to rad
         """
         # Define unit vectors in each direction
         # X, Y , Z  axis :  North/South , East/West, Up, Down
@@ -185,12 +186,12 @@ class Wind:
 
         return turbulence_vector
 
-    def plot_wind(wind_object, freq, direction):
+    def plot_wind(self,freq, direction):
         # Get wind direction vector
-        wind_dir = wind.wind_direction(direction)
+        wind_dir = self.wind_direction(direction)
 
         # Get turbulence vector
-        turbulence = wind.turbulence_vector(freq, direction)
+        turbulence = self.turbulence_vector(freq, direction)
 
         # Create 3D axis
         fig = plt.figure()
@@ -215,6 +216,129 @@ class Wind:
 
         plt.show()
 
+    wind_speed=1.0          # test
+    wind_direction= 1.0       # test
+    position = [53.38165675,-1.4821555953306795, 10]  # drop test from Sheffield coordinates
+    #real_landing = [52.668133,-1.522133,0]
+    real_landing = [52.668949,-1.524042,0]
+    apogee_direction = 45.0   # test
+    
+    def descent_vector(self,wind_speed,wind_direction):
+        # deg to rad
+        wind_direction_radians = math.radians(wind_direction)
+        print("wind_direction_radians:", wind_direction_radians)
+        print("wind_speed:", wind_speed)
+        print("apogee_direction:", self.apogee_direction)
+        # x and y components are based on the wind speed and direction, 
+        # the z component is based on the rocket's apogee direction and position.
+        x = -math.sin(wind_direction_radians) * wind_speed
+        y = -math.cos(wind_direction_radians) * wind_speed
+        z =  21  # vertical descent rate 
+        x = round(x, 2)
+        y = round(y, 2)
+        z = round(z, 2)
+        print("x:", x)
+        print("y:", y)
+        print("z:", z)
+        
+        magnitude = math.sqrt(x**2 + y**2 + z**2)
+        x = x / magnitude
+        y = y / magnitude
+        z = z / magnitude
+
+        # update x and y components based on current position
+        self.position[0] += x
+        self.position[1] += y
+        self.position[2] += z
+        # x *= self.wind_speed
+        # y *= self.wind_speed
+
+        
+        return self.position[:]
+
+    def landing_area(self, timeout=20, num_trials=100):
+        landing_spots = []
+        altitudes = []
+        start_time = time.time()
+
+        for i in range(num_trials):
+            # calculate wind speed and direction using Monte Carlo simulation
+            wind_speed_mc = random.normalvariate(self.wind_speed, self.wind_speed * 0.01)
+            #wind_speed_mc = 1.0
+            #wind_direction_mc = random.normalvariate(self.wind_direction, 0.5) # deviation 2
+            wind_direction_mc=45
+            position = self.position[:]
+            altitude = position[2]
+
+            # iteratively update the rocket's position
+            while altitude >= 0:
+                # check if timeout has been reached
+                elapsed_time = time.time() - start_time
+                if elapsed_time >= timeout:
+                    print(f"Timeout reached after {timeout} seconds")
+                    break
+                
+                descent = self.descent_vector(wind_speed_mc,wind_direction_mc)
+                position[0] += descent[0]
+                position[1] += descent[1]
+                position[2] += descent[2]
+                altitude -= descent[2]
+
+            landing_spot = tuple(position[:2])
+            landing_spots.append(landing_spot)
+            altitudes.append(position[2])
+
+
+        print(f"Rocket landed! Spot: {landing_spots} Number of trials: {num_trials}")
+        print(f"Minimum altitude: {min(altitudes)}")
+        print(f"Maximum altitude: {max(altitudes)}")
+
+        # generate scatter plot of landing coordinates and altitudes
+        fig, ax = plt.subplots()
+        # scatter = ax.scatter([x[0] for x in landing_spots], [x[1] for x in landing_spots], c=altitudes, cmap='cool')
+
+        #ax.plot(self.real_landing,'bo')
+        print("real landing",self.real_landing )
+
+        # Add marker for real landing spot
+        ax.plot(self.real_landing[0], self.real_landing[1], 'go', label='Real landing spot')
+        circle = Circle(self.real_landing, radius=1, color='blue', fill=False)
+        ax.add_artist(circle)
+
+        # Add marker for landing area
+        ax.plot([spot[0] for spot in landing_spots], [spot[1] for spot in landing_spots], 'rx')
+
+        ax.legend()
+        ax.set_title("Landing Coordinates")
+        ax.set_xlabel("X Coordinate")
+        ax.set_ylabel("Y Coordinate")
+        plt.show()
+
+        ax.set_title("Landing Coordinates")
+        ax.set_xlabel("X Coordinate")
+        ax.set_ylabel("Y Ccordinate")
+        plt.show()
+
+        # # create the basemap object
+        # m = Basemap(projection='mill', lon_0=0)
+
+        # # draw coastlines, countries, and states
+        # m.drawcoastlines()
+        # m.drawcountries()
+        # m.fillcontinents(color='white',lake_color='aqua')
+        # m.drawmapboundary(fill_color='aqua')
+
+        # # convert landing spots to map coordinates
+        # x, y = m([spot[1] for spot in landing_spots], [spot[0] for spot in landing_spots])
+
+        # # plot landing spots on the map
+        # m.scatter(x, y, s=5, marker='o', color='r')
+
+        # show the plot
+        # plt.show()
+
+
+        
     def generate_wind_profile(self,altitudes, wind_speed, wind_dir, turbulence_freq):
         """
         Generate a wind profile by combining the turbulence vectors with wind direction vectors for different altitudes.
@@ -286,132 +410,6 @@ class Wind:
     # stage.apogee_position = []
     
 
-    wind_speed=1.0          # test
-    wind_direction= 45.0       # test
-    position = [53.38165675,-1.4821555953306795, 10]  # drop test from Sheffield coordinates
-    apogee_direction = 45.0   # test
-    
-    def descent_vector(self,wind_speed,wind_direction):
-        # deg to rad
-        wind_direction_radians = math.radians(wind_direction)
-        print("wind_direction_radians:", wind_direction_radians)
-        print("wind_speed:", wind_speed)
-        print("apogee_direction:", self.apogee_direction)
-        # x and y components are based on the wind speed and direction, 
-        # the z component is based on the rocket's apogee direction and position.
-        x = -math.sin(wind_direction_radians) * wind_speed
-        y = -math.cos(wind_direction_radians) * wind_speed
-        z = -self.position[2] / math.tan(math.radians(self.apogee_direction))
-        x = round(x, 2)
-        y = round(y, 2)
-        z = round(z, 2)
-        print("x:", x)
-        print("y:", y)
-        print("z:", z)
-        
-        magnitude = math.sqrt(x**2 + y**2 + z**2)
-        x = x / magnitude
-        y = y / magnitude
-        z = z / magnitude
-
-        # update x and y components based on current position
-        self.position[0] += x
-        self.position[1] += y
-        self.position[2] += z
-        # x *= self.wind_speed
-        # y *= self.wind_speed
-
-        
-        return self.position[:]
-
-
-    def circle(center_x, center_y, radius):
-        # create a circle object
-        circle_obj = plt.Circle((center_x, center_y), radius, fill=False)
-        
-        # get the current plot object
-        ax = plt.gca()
-        
-        # add the circle object to the plot
-        ax.add_patch(circle_obj)
-        
-        # show the plot
-        plt.show()
-
-        
-
-    def landing_area(self, timeout=20, num_trials=100):
-        landing_spots = []
-        altitudes = []
-        start_time = time.time()
-
-        for i in range(num_trials):
-            # calculate wind speed and direction using Monte Carlo simulation
-            #wind_speed_mc = random.normalvariate(self.wind_speed, self.wind_speed * 0.01)
-            wind_speed_mc = 1.0
-            wind_direction_mc = random.normalvariate(self.wind_direction, 2) # deviation 2
-            #wind_direction_mc=45
-            position = self.position[:]
-            altitude = position[2]
-
-            # iteratively update the rocket's position
-            while altitude >= 0:
-                # check if timeout has been reached
-                elapsed_time = time.time() - start_time
-                if elapsed_time >= timeout:
-                    print(f"Timeout reached after {timeout} seconds")
-                    break
-                
-                descent = self.descent_vector(wind_speed_mc,wind_direction_mc)
-                position[0] += descent[0]
-                position[1] += descent[1]
-                position[2] += descent[2]
-                altitude -= descent[2]
-
-            landing_spot = tuple(position[:2])
-            landing_spots.append(landing_spot)
-            altitudes.append(position[2])
-
-
-        print(f"Rocket landed! Spot: {landing_spots} Number of trials: {num_trials}")
-        print(f"Minimum altitude: {min(altitudes)}")
-        print(f"Maximum altitude: {max(altitudes)}")
-
-        # generate scatter plot of landing coordinates and altitudes
-        fig, ax = plt.subplots()
-        # scatter = ax.scatter([x[0] for x in landing_spots], [x[1] for x in landing_spots], c=altitudes, cmap='cool')
-
-        # Add circle or marker for landing spot
-        for spot in landing_spots:
-            circle = Circle(spot, 0.1, )
-            ax.add_artist(circle)
-
-        # Add marker for landing spot
-        ax.plot([spot[0] for spot in landing_spots], [spot[1] for spot in landing_spots], 'rx')
-
-
-        ax.set_title("Landing Coordinates")
-        ax.set_xlabel("X Coordinate")
-        ax.set_ylabel("Y Ccordinate")
-        plt.show()
-
-        # # create the basemap object
-        # m = Basemap(projection='mill', lon_0=0)
-
-        # # draw coastlines, countries, and states
-        # m.drawcoastlines()
-        # m.drawcountries()
-        # m.fillcontinents(color='white',lake_color='aqua')
-        # m.drawmapboundary(fill_color='aqua')
-
-        # # convert landing spots to map coordinates
-        # x, y = m([spot[1] for spot in landing_spots], [spot[0] for spot in landing_spots])
-
-        # # plot landing spots on the map
-        # m.scatter(x, y, s=5, marker='o', color='r')
-
-        # show the plot
-        # plt.show()
 
 
 """ Generate a wind profile with altitude range from 0 to 1000 meters """
