@@ -6,6 +6,9 @@ from trajectory_generator.constants import TIME_STEP
 from trajectory_generator.atmosphere import Atmosphere
 import os
 
+# temp for wind test
+import matplotlib.pyplot as plt
+
 flight_data = Flight_Data(
     name = "KarmanMini2 Relaunch Data",
     desired_sample_time = TIME_STEP,
@@ -38,7 +41,7 @@ kmini2_U = Stage(
 
 launch_site = Launchsite(
     "Midlands Rocketry Club, United Kingdom",
-    latitude = 52.668250, longitude= -1.524632, altitude = 10,
+    latitude = 52.669628, longitude= -1.521624, altitude = 10,
     azimuth = 0,      # pointing to true north
     elevation = 85    # pointing nearly to zenith
 )
@@ -53,10 +56,14 @@ rocket.run_simulation()
 
 """ Test the rocket landing spot method """
 wind = Wind(255) 
+
+wind.plot_wind(wind,'north')
+
 #rocket = Rocket(apogee=1000, apogee_direction=90)  # apogee of 10000 feet, direction straight up
 #landing_spot = wind.land_spot()
 #print(landing_spot)  # prints the x and y coordinates of the landing spot
-wind.landing_area()
+
+# wind.landing_area()
 
 
 # Save the simulated altitude and compate with real data 
