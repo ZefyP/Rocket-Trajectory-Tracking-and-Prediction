@@ -57,7 +57,7 @@ rocket.run_simulation()
 """ Test the rocket landing spot method """
 wind = Wind(255) 
 
-wind.plot_wind(wind,'north')
+wind.plot_wind(20,'north') # 20hz is every 50th sample
 
 #rocket = Rocket(apogee=1000, apogee_direction=90)  # apogee of 10000 feet, direction straight up
 #landing_spot = wind.land_spot()

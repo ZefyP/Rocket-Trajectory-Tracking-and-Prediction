@@ -221,15 +221,15 @@ class Wind:
 
 
     wind_speed=1.0          # test
-    wind_direction= 1.0       # test
+    wind_dir= 1.0       # test
     position = [53.38165675,-1.4821555953306795, 10]  # drop test from Sheffield coordinates
     #real_landing = [52.668133,-1.522133,0]
     real_landing = [52.668949,-1.524042,0]
     apogee_direction = 45.0   # test
     
-    def descent_vector(self,wind_speed,wind_direction):
+    def descent_vector(self,wind_speed,wind_dir):
         # deg to rad
-        wind_direction_radians = math.radians(wind_direction)
+        wind_direction_radians = math.radians(wind_dir)
         print("wind_direction_radians:", wind_direction_radians)
         print("wind_speed:", wind_speed)
         print("apogee_direction:", self.apogee_direction)
