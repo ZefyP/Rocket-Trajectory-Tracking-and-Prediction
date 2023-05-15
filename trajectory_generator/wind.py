@@ -201,7 +201,7 @@ class Wind:
         ax = fig.add_subplot(projection='3d')
 
         # Plot wind vector
-        ax.quiver(0, 0, 0, wind_dir[0], wind_dir[1], wind_dir[2], color='blue', label='Wind Vector')
+        #ax.quiver(0, 0, 0, wind_dir[0], wind_dir[1], wind_dir[2], color='blue', label='Wind Vector')
 
         # Plot turbulence vector
         ax.quiver(0, 0, 0, turbulence[0], turbulence[1], turbulence[2], color='red', label='Turbulence Vector')
@@ -210,9 +210,9 @@ class Wind:
         ax.set_xlim(-1, 1)
         ax.set_ylim(-1, 1)
         ax.set_zlim(-1, 1)
-        ax.set_xlabel('North/South')
-        ax.set_ylabel('East/West')
-        ax.set_zlabel('Up/Down')
+        ax.set_xlabel('South-North')
+        ax.set_ylabel('West-East')
+        ax.set_zlabel('Up-Down')
 
         # Add legend
         ax.legend()
