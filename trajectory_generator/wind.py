@@ -185,7 +185,10 @@ class Wind:
         turbulence_vector = wind_dir * turbulence_magnitude
 
         return turbulence_vector
+    
 
+
+        
     def plot_wind(self,freq, direction):
         # Get wind direction vector
         wind_dir = self.wind_direction(direction)
@@ -215,6 +218,7 @@ class Wind:
         ax.legend()
 
         plt.show()
+
 
     wind_speed=1.0          # test
     wind_direction= 1.0       # test
