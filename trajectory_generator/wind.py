@@ -323,18 +323,34 @@ class Wind:
 
         
         return self.position[:]
-    
 
-    def landing_area(self, timeout=20, num_trials=10):
+
+    def circle(center_x, center_y, radius):
+        # create a circle object
+        circle_obj = plt.Circle((center_x, center_y), radius, fill=False)
+        
+        # get the current plot object
+        ax = plt.gca()
+        
+        # add the circle object to the plot
+        ax.add_patch(circle_obj)
+        
+        # show the plot
+        plt.show()
+
+        
+
+    def landing_area(self, timeout=20, num_trials=100):
         landing_spots = []
         altitudes = []
         start_time = time.time()
 
         for i in range(num_trials):
             # calculate wind speed and direction using Monte Carlo simulation
-            wind_speed_mc = random.normalvariate(self.wind_speed, self.wind_speed * 0.1)
+            #wind_speed_mc = random.normalvariate(self.wind_speed, self.wind_speed * 0.01)
+            wind_speed_mc = 1.0
             wind_direction_mc = random.normalvariate(self.wind_direction, 2) # deviation 2
-
+            #wind_direction_mc=45
             position = self.position[:]
             altitude = position[2]
 
@@ -345,7 +361,7 @@ class Wind:
                 if elapsed_time >= timeout:
                     print(f"Timeout reached after {timeout} seconds")
                     break
-
+                
                 descent = self.descent_vector(wind_speed_mc,wind_direction_mc)
                 position[0] += descent[0]
                 position[1] += descent[1]
@@ -356,54 +372,47 @@ class Wind:
             landing_spots.append(landing_spot)
             altitudes.append(position[2])
 
+
         print(f"Rocket landed! Spot: {landing_spots} Number of trials: {num_trials}")
         print(f"Minimum altitude: {min(altitudes)}")
         print(f"Maximum altitude: {max(altitudes)}")
 
         # generate scatter plot of landing coordinates and altitudes
-        # fig, ax = plt.subplots()
+        fig, ax = plt.subplots()
         # scatter = ax.scatter([x[0] for x in landing_spots], [x[1] for x in landing_spots], c=altitudes, cmap='cool')
-        # ax.set_title("Landing Coordinates")
-        # ax.set_xlabel("X Coordinate")
-        # ax.set_ylabel("Y Ccordinate")
-        # plt.show()
-        
-                
-                # get the minimum and maximum latitudes and longitudes of the landing spots
-        min_lat = min([spot[0] for spot in landing_spots])
-        max_lat = max([spot[0] for spot in landing_spots])
-        min_lon = min([spot[1] for spot in landing_spots])
-        max_lon = max([spot[1] for spot in landing_spots])
 
-        # set the map limits to the range of the landing spots
-        padding = 0.1  # add a padding of 10% to the map limits
-        mllat = min_lat - padding * abs(max_lat - min_lat)
-        mllon = min_lon - padding * abs(max_lon - min_lon)
-        mrlat = max_lat + padding * abs(max_lat - min_lat)
-        mrlon = max_lon + padding * abs(max_lon - min_lon)
+        # Add circle or marker for landing spot
+        for spot in landing_spots:
+            circle = Circle(spot, 0.1, )
+            ax.add_artist(circle)
 
-         # create the basemap object with the adjusted map limits
-        m = Basemap(projection='mill', llcrnrlat=mllat, urcrnrlat=mrlat, \
-                    llcrnrlon=mllon, urcrnrlon=mrlon, resolution='c')
+        # Add marker for landing spot
+        ax.plot([spot[0] for spot in landing_spots], [spot[1] for spot in landing_spots], 'rx')
 
 
-        m.drawcoastlines()
-        m.drawcountries()
-        m.fillcontinents(color='white',lake_color='aqua')
-        m.drawmapboundary(fill_color='aqua')
-        x, y = m([spot[1] for spot in landing_spots], [spot[0] for spot in landing_spots])
-        
-        for i, spot in enumerate(landing_spots):
-            plt.annotate(str(i+1), xy=(x[i], y[i]), xytext=(5, 5), textcoords='offset points')
-
-        m.scatter(x, y, s=5, marker='o', color='r')
-
-       
-
-        plt.title("Landing Coordinates")
+        ax.set_title("Landing Coordinates")
+        ax.set_xlabel("X Coordinate")
+        ax.set_ylabel("Y Ccordinate")
         plt.show()
 
-        return landing_spots
+        # # create the basemap object
+        # m = Basemap(projection='mill', lon_0=0)
+
+        # # draw coastlines, countries, and states
+        # m.drawcoastlines()
+        # m.drawcountries()
+        # m.fillcontinents(color='white',lake_color='aqua')
+        # m.drawmapboundary(fill_color='aqua')
+
+        # # convert landing spots to map coordinates
+        # x, y = m([spot[1] for spot in landing_spots], [spot[0] for spot in landing_spots])
+
+        # # plot landing spots on the map
+        # m.scatter(x, y, s=5, marker='o', color='r')
+
+        # show the plot
+        # plt.show()
+
 
 """ Generate a wind profile with altitude range from 0 to 1000 meters """
 
