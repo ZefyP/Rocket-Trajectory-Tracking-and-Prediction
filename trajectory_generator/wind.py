@@ -20,65 +20,8 @@ import pandas as pd
 
 """
 TODO:
-Adding a method to simulate turbulence for different altitudes using the get_noise method in the Atmosphere class.
-
-Adding a method to generate a wind profile by combining the turbulence vectors with wind direction vectors for different altitudes.
-
-Adding a method to save the wind profile to a file.
-
 Adding methods to plot the wind profile in 3D and 2D.
 # """
-
-# class WindProfile:
-#     """
-#     A class to generate a wind profile based on gusts and an altitude range from 0 to 50000.
-
-#     Args:
-#         gusts (list): A list of tuples representing the gust range and duration, e.g. [(10, 10), (20, 20)].
-#         altitude_range (tuple): A tuple representing the minimum and maximum altitude, e.g. (0, 50000).
-#         profile_resolution (int): The resolution of the wind profile, in meters.
-
-#     Attributes:
-#         gusts (list): A list of tuples representing the gust range and duration, e.g. [(10, 10), (20, 20)].
-#         altitude_range (tuple): A tuple representing the minimum and maximum altitude, e.g. (0, 50000).
-#         profile_resolution (int): The resolution of the wind profile, in meters.
-#         profile (np.ndarray): A 2D array representing the wind profile, with the first column as the altitude and the second column as the wind speed.
-#     """
-#     def __init__(self, gusts, altitude_range, profile_resolution):
-#         self.gusts = gusts
-#         self.altitude_range = altitude_range
-#         self.profile_resolution = profile_resolution
-#         self.profile = self.generate_profile()
-
-
-#     def generate_profile(self):
-#         """
-#         Generate a wind profile based on gusts and an altitude range using a logarithmic wind profile.
-
-#         Returns:
-#             profile (np.ndarray): A 2D array representing the wind profile, with the first column as the altitude and the second column as the wind speed.
-#         """
-#         # Calculate the number of points in the profile
-#         num_points = int((self.altitude_range[1] - self.altitude_range[0]) / self.profile_resolution)
-
-#         # Create an array of altitudes
-#         altitudes = np.linspace(self.altitude_range[0], self.altitude_range[1], num_points)
-
-#         # Generate wind speeds based on the logarithmic wind profile
-#         ref_speed = self.gusts[0][0]
-#         ref_altitude = 10
-#         wind_speeds = np.zeros_like(altitudes)
-#         wind_speeds[altitudes < ref_altitude] = ref_speed * (altitudes[altitudes < ref_altitude] / ref_altitude) ** (1 / 7)
-#         for gust in self.gusts:
-#             gust_start = np.random.randint(0, num_points - 1)
-#             gust_end = gust_start + int(gust[1] / self.profile_resolution)
-#             gust_end = min(gust_end, num_points - 1)
-#             wind_speeds[gust_start:gust_end] = gust[0]
-
-#         # Create the wind profile array
-#         profile = np.vstack([altitudes, wind_speeds]).T
-
-#         return profile
 
 class Wind:
     def __init__(self, 
@@ -248,7 +191,7 @@ class Wind:
             #print(f"{h},{wind_vector[0]},{wind_vector[1]},{wind_vector[2]}") # DEBUG
 
          # Save the wind profile to a CSV file
-        filename = f"wind_profile_{altitude_range}_{self.wind_speed}_{self.wind_direction}_{self.frequency}.csv"
+        filename = f"wind_profile_{altitude_range+1}_{self.wind_speed}_{self.wind_direction}_{self.frequency}.csv"
         with open(filename, 'w') as f:
             f.write("altitude(meters),wind_vector(E,N,U)\n")
             for i, wind_vector in enumerate(winds):
@@ -271,6 +214,38 @@ class Wind:
         scaled_vector = wind_speed * unit_vector
         print(scaled_vector) # DEBUG
         return scaled_vector
+    
+        
+    def plot_wind_profile(self,wp_filepath):
+        with open(wp_filepath, 'r') as f:
+            reader = csv.reader(f)
+            next(reader)  # Skip header row
+            #data = np.array(list(reader), dtype=np.float32)
+            #data = np.genfromtxt(wp_filepath, delimiter=',', skip_header=1, dtype=np.float32)
+            data = np.genfromtxt(wp_filepath, delimiter=',', skip_header=1, dtype=np.float32, invalid_raise=False, usemask=True)
+            # data = data[~np.isnan(data).any(axis=1)]
+
+
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+        
+        # Extract ENU wind vectors
+        wind_vectors = data[:, 1:]
+        ENU = wind_vectors[:, [0, 1, 2]]  # TODO: Swap Y and Z axis for consistency with ENU convention
+        
+        # Plot wind vectors
+        for i, (x, y, z) in enumerate(ENU):
+            ax.quiver(0, 0, i, x, y, z, length=1, normalize=True, arrow_length_ratio=0.1)
+        
+        # Set axis labels and limits
+        ax.set_xlabel('East')
+        ax.set_ylabel('North')
+        ax.set_zlabel('Up')
+        ax.set_xlim(-50, 50)
+        ax.set_ylim(-50, 50)
+        ax.set_zlim(0, len(data))
+        
+        plt.show()
 
     # def plot_wind(self, altitude, wind_dir):
     #     # Get wind direction vector

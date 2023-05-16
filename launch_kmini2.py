@@ -63,7 +63,9 @@ wind = Wind(
             ) 
 
 #wind.plot_wind(altitude, 'north') 
-wind.generate_wind_profile(0,50000) # use only once
+#wind.generate_wind_profile(0,500) # use only once and then comment out
+wp_filepath = "C:\ergasia\projects\Rocket-Trajectory-Tracking-and-Prediction\wind_profile_0-499_5_north_20.csv"
+wind.plot_wind_profile(wp_filepath)
 
 #rocket = Rocket(apogee=1000, apogee_direction=90)  # apogee of 10000 feet, direction straight up
 #landing_spot = wind.land_spot()
