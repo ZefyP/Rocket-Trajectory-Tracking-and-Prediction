@@ -14,29 +14,87 @@ import time # timeout
 import random # monte carlo sim
 from mpl_toolkits.basemap import Basemap # TODO: add to requirements,txt 
 from mpl_toolkits.mplot3d import Axes3D
-
-
+import csv
+import torch
+import pandas as pd
 
 """
 TODO:
-Adding a method to simulate turbulence for different altitudes using the simulate_turbulence method in the Atmosphere class.
+Adding a method to simulate turbulence for different altitudes using the get_noise method in the Atmosphere class.
 
 Adding a method to generate a wind profile by combining the turbulence vectors with wind direction vectors for different altitudes.
 
 Adding a method to save the wind profile to a file.
 
 Adding methods to plot the wind profile in 3D and 2D.
-"""
+# """
+
+# class WindProfile:
+#     """
+#     A class to generate a wind profile based on gusts and an altitude range from 0 to 50000.
+
+#     Args:
+#         gusts (list): A list of tuples representing the gust range and duration, e.g. [(10, 10), (20, 20)].
+#         altitude_range (tuple): A tuple representing the minimum and maximum altitude, e.g. (0, 50000).
+#         profile_resolution (int): The resolution of the wind profile, in meters.
+
+#     Attributes:
+#         gusts (list): A list of tuples representing the gust range and duration, e.g. [(10, 10), (20, 20)].
+#         altitude_range (tuple): A tuple representing the minimum and maximum altitude, e.g. (0, 50000).
+#         profile_resolution (int): The resolution of the wind profile, in meters.
+#         profile (np.ndarray): A 2D array representing the wind profile, with the first column as the altitude and the second column as the wind speed.
+#     """
+#     def __init__(self, gusts, altitude_range, profile_resolution):
+#         self.gusts = gusts
+#         self.altitude_range = altitude_range
+#         self.profile_resolution = profile_resolution
+#         self.profile = self.generate_profile()
+
+
+#     def generate_profile(self):
+#         """
+#         Generate a wind profile based on gusts and an altitude range using a logarithmic wind profile.
+
+#         Returns:
+#             profile (np.ndarray): A 2D array representing the wind profile, with the first column as the altitude and the second column as the wind speed.
+#         """
+#         # Calculate the number of points in the profile
+#         num_points = int((self.altitude_range[1] - self.altitude_range[0]) / self.profile_resolution)
+
+#         # Create an array of altitudes
+#         altitudes = np.linspace(self.altitude_range[0], self.altitude_range[1], num_points)
+
+#         # Generate wind speeds based on the logarithmic wind profile
+#         ref_speed = self.gusts[0][0]
+#         ref_altitude = 10
+#         wind_speeds = np.zeros_like(altitudes)
+#         wind_speeds[altitudes < ref_altitude] = ref_speed * (altitudes[altitudes < ref_altitude] / ref_altitude) ** (1 / 7)
+#         for gust in self.gusts:
+#             gust_start = np.random.randint(0, num_points - 1)
+#             gust_end = gust_start + int(gust[1] / self.profile_resolution)
+#             gust_end = min(gust_end, num_points - 1)
+#             wind_speeds[gust_start:gust_end] = gust[0]
+
+#         # Create the wind profile array
+#         profile = np.vstack([altitudes, wind_speeds]).T
+
+#         return profile
 
 class Wind:
-
-
-    def __init__(self, altitude):
+    def __init__(self, 
+                 altitude, 
+                 wind_speed: float, 
+                 wind_direction: str, 
+                 frequency: int):
+        
         self.atmosphere = Atmosphere(altitude)
-        # self.layer = Atmosphere._get_layer_nums()
+        self.wind_speed = wind_speed
+        self.wind_direction = wind_direction
+        self.frequency = frequency
+        self.altitude = altitude
 
 
-    def simulate_turbulence(self,frequency, plotting=True):
+    def get_noise(self, plotting=False): # not used for now
         """
         Generate pink noise, filter it to simulate turbulence, and extract samples at a specified frequency.
 
@@ -46,6 +104,8 @@ class Wind:
         Returns:
             samples (ndarray)
         """
+        # store given freq from object
+        frequency = self.frequency
         # Generate white noise with 10000 samples
         white_noise = np.random.randn(10000)
 
@@ -69,8 +129,9 @@ class Wind:
             # Normalise the data to lie between 0 and 1.
             samples = samples / np.max(samples)
             
-            # Reshape into a 2-dimensional array: [no of samples, no of channels]: [samples,1]
-            samples = samples.reshape(-1,1)
+            # Reshape into a 1-dimensional array: [no of samples]
+            samples = samples.flatten()
+            # samples = samples.reshape(samples,1)
             # samples_20hz = pink_noise[::50]
 
         if plotting == True:
@@ -106,18 +167,13 @@ class Wind:
 
         return samples
 
-
-    def wind_direction(self,direction=None): 
+    def wind_dir_vector(self, direction=None):  # TODO: turn into val in the start of the class to run only once
         """
         Generate a wind direction vector based on input direction.
 
-        Params:
-            direction (str): The direction of the wind as a string, e.g. 'north', 'northwest', 'south', etc.
-
-        Returns:
-            wind_dir (np.ndarray): A 3D wind direction vector.
+        Params: direction (str): The direction of the wind as a string, e.g. 'north', 'northwest', 'south', etc.
+        Returns: wind_dir (np.ndarray): A 3D wind direction vector.
                                     [x,y,z]
-        # TODO: Improve to direction based on 360 deg to rad
         """
         # Define unit vectors in each direction
         # X, Y , Z  axis :  North/South , East/West, Up, Down
@@ -158,260 +214,191 @@ class Wind:
             # direction == 'southwest'
             wind_dir = southwest
 
+        # print(f"Wind Direction: {wind_dir}") # DEBUG
         return wind_dir
-
-    def turbulence_vector(self,frequency, direction=None):
-        """
-        Generate a turbulence vector based on input frequency and direction.
-
-        Params:
-            frequency (float): The frequency (per second) at which to extract samples from the pink noise.
-            direction (str): The direction of the wind as a string, e.g. 'north', 'northwest', 'south', etc.
-
-        Returns:
-            turbulence_vector (np.ndarray): A 3D turbulence vector.
-                                                [x,y,z]
-        """
-        # Generate turbulence samples
-        samples = self.simulate_turbulence(frequency, plotting=False)
-
-        # Calculate turbulence magnitude
-        turbulence_magnitude = np.std(samples)
-
-        # Get wind direction vector
-        wind_dir = self.wind_direction(direction)
-
-        # Multiply wind direction vector by turbulence magnitude
-        turbulence_vector = wind_dir * turbulence_magnitude
-
-        return turbulence_vector
     
 
+    def generate_wind_profile(self,min=0,max=50001):
+        print("Generating a new wind profile...")
 
-        
-    def plot_wind(self,freq, direction):
-        # Get wind direction vector
-        wind_dir = self.wind_direction(direction)
+        altitudes = np.arange(min, max, 1)
+        winds = np.empty((altitudes.shape[0], 3))
+        # store the range for the filename
+        altitude_range = f"{altitudes.min()}-{altitudes.max()}"
 
-        # Get turbulence vector
-        turbulence = self.turbulence_vector(freq, direction)
+         # Get the wind speed and direction at the current altitude
+        wd = self.wind_dir_vector(self.wind_direction)
 
-        # Create 3D axis
-        fig = plt.figure()
-        ax = fig.add_subplot(projection='3d')
+        for i, h in enumerate(altitudes): 
 
-        # Plot wind vector
-        #ax.quiver(0, 0, 0, wind_dir[0], wind_dir[1], wind_dir[2], color='blue', label='Wind Vector')
+            atmos = Atmosphere(int(h))
+            density = atmos.density
+            gust_force = density * self.wind_speed**2
+            gust_force = np.round(gust_force,2)
+            
+            # Generate turbulence
+            #turb = self.get_noise(self.frequency, plotting=False)
+            turb = 0 # TODO: temporarily not used. will later add into wind_vector
 
-        # Plot turbulence vector
-        ax.quiver(0, 0, 0, turbulence[0], turbulence[1], turbulence[2], color='red', label='Turbulence Vector')
+            # Calculate the wind vector
+            wind_vector = np.array([gust_force * wd[0], gust_force * wd[1], -gust_force * wd[2]])
+            
+            # Append the altitude and wind vector to the list of winds
+            winds[i] = wind_vector.flatten()
+            #print(f"{h},{wind_vector[0]},{wind_vector[1]},{wind_vector[2]}") # DEBUG
 
-        # Set limits and labels
-        ax.set_xlim(-1, 1)
-        ax.set_ylim(-1, 1)
-        ax.set_zlim(-1, 1)
-        ax.set_xlabel('South-North')
-        ax.set_ylabel('West-East')
-        ax.set_zlabel('Up-Down')
-
-        # Add legend
-        ax.legend()
-
-        plt.show()
+         # Save the wind profile to a CSV file
+        filename = f"wind_profile_{altitude_range}_{self.wind_speed}_{self.wind_direction}_{self.frequency}.csv"
+        with open(filename, 'w') as f:
+            f.write("altitude(meters),wind_vector(E,N,U)\n")
+            for i, wind_vector in enumerate(winds):
+                wind_str = f"{altitudes[i]},{wind_vector[0]},{wind_vector[1]},{wind_vector[2]}"
+                f.write(wind_str + '\n')
+        print("Wind profile has been generated.") # TODO: add error handling by searching for the file.
 
 
-    wind_speed=1.0          # test
-    wind_dir= 1.0       # test
-    position = [53.38165675,-1.4821555953306795, 10]  # drop test from Sheffield coordinates
-    #real_landing = [52.668133,-1.522133,0]
-    real_landing = [52.668949,-1.524042,0]
-    apogee_direction = 45.0   # test
+    def get_wind_vector_csv(self,filename, altitude, direction):
+        """
+        Returns a wind vector from a CSV file.
+        """
+        data = np.loadtxt(filename, delimiter=",")
+        altitude_index = int(altitude / 1000)  # Convert altitude to index in CSV file
+        wind_vector = data[altitude_index]
+
+        # Scale the wind vector based on wind direction
+        unit_vector = self.wind_dir_vector(direction)
+        wind_speed = np.linalg.norm(wind_vector)
+        scaled_vector = wind_speed * unit_vector
+        print(scaled_vector) # DEBUG
+        return scaled_vector
+
+    # def plot_wind(self, altitude, wind_dir):
+    #     # Get wind direction vector
+    #     wind_dir = self.wind_dir_vector(self.wind_direction)
+
+    #     atmos = Atmosphere(altitude)
+
+    #     # Get gust vector
+    #     gust = self.gust_vector(atmos.density, self.wind_speed) # get gust for specific altitude
+    #     print("gust", gust)
+    #     # Create 3D axis
+    #     fig = plt.figure()
+    #     ax = fig.add_subplot(projection='3d')
+
+    #     # Plot wind vector
+    #     #ax.quiver(0, 0, 0, wind_dir[0], wind_dir[1], wind_dir[2], color='blue', label='Wind Vector')
+
+    #     # Plot turbulence vector
+    #     ax.quiver(0, 0, 0, gust[0], gust[1], gust[2], color='red', label='Turbulence Vector')
+
+
+    #     # Calc the maximum value in each dimension of the wind and turbulence vectors
+    #     max_value = max(np.amax(np.abs(gust)), np.amax(np.abs(wind_dir)))
+    #     max_value += 1
+    #     # Set limits based on the maximum value
+    #     ax.set_xlim(-max_value, max_value)
+    #     ax.set_ylim(-max_value, max_value)
+    #     ax.set_zlim(-max_value, max_value)
+
+    #     ax.set_xlabel('South-North')
+    #     ax.set_ylabel('West-East')
+    #     ax.set_zlabel('Up-Down')
+
+    #     # Add legend
+    #     ax.legend()
+
+    #     plt.show()
+
+
+
+#         """
+#         Generate a wind profile by combining the turbulence vectors with wind direction vectors for different altitudes.
+
+#         Parameters:
+#         altitudes   (list): List of altitudes at which the wind profile needs to be generated.
+#         wind_speed  (float): Mean wind speed at the ground level. # TODO: Add to class objects. User should obtain from weather forecast. 
+#         wind_dir    (str): Wind direction at the ground level in degrees.
+#         turbulence_freq (int): Turbulence intensity at the ground level.
+
+#         Returns:
+#         wind_profile (list): A list of 3D vectors representing the wind profile at different altitudes.
+#         """
     
-    def descent_vector(self,wind_speed,wind_dir):
-        # deg to rad
-        wind_direction_radians = math.radians(wind_dir)
-        print("wind_direction_radians:", wind_direction_radians)
-        print("wind_speed:", wind_speed)
-        print("apogee_direction:", self.apogee_direction)
-        # x and y components are based on the wind speed and direction, 
-        # the z component is based on the rocket's apogee direction and position.
-        x = -math.sin(wind_direction_radians) * wind_speed
-        y = -math.cos(wind_direction_radians) * wind_speed
-        z =  21  # vertical descent rate 
-        x = round(x, 2)
-        y = round(y, 2)
-        z = round(z, 2)
-        print("x:", x)
-        print("y:", y)
-        print("z:", z)
+#     def generate_wind_profile(self):
         
-        magnitude = math.sqrt(x**2 + y**2 + z**2)
-        x = x / magnitude
-        y = y / magnitude
-        z = z / magnitude
+#         # Define altitude range in meters
+#         altitude_range = np.arange(10, 5000, 100)
 
-        # update x and y components based on current position
-        self.position[0] += x
-        self.position[1] += y
-        self.position[2] += z
-        # x *= self.wind_speed
-        # y *= self.wind_speed
+#         with open('wind_profile.csv', mode='w') as file:
+#             writer = csv.writer(file)
+#             writer.writerow(['altitude(m)', 'gust magnitude(N)', 'direction'])
 
-        
-        return self.position[:]
+#             for altitude in altitude_range:
 
-    def landing_area(self, timeout=20, num_trials=100):
-        landing_spots = []
-        altitudes = []
-        start_time = time.time()
+#                 # Calculate wind speed and direction based on altitude
+#                 wind_dir = self.wind_direction
+#                 wind_speed = self.wind_speed
 
-        for i in range(num_trials):
-            # calculate wind speed and direction using Monte Carlo simulation
-            wind_speed_mc = random.normalvariate(self.wind_speed, self.wind_speed * 0.01)
-            #wind_speed_mc = 1.0
-            #wind_direction_mc = random.normalvariate(self.wind_direction, 0.5) # deviation 2
-            wind_direction_mc=45
-            position = self.position[:]
-            altitude = position[2]
+#                 # Generate turbulence samples which vary the the wind force times [-1,1] at given freq
+#                 samples = self.get_noise(self.frequency, plotting=False)
+#                 # Pick a sample in random
+#                 samples = np.random.choice(samples)
+#                 # print(samples)
 
-            # iteratively update the rocket's position
-            while altitude >= 0:
-                # check if timeout has been reached
-                elapsed_time = time.time() - start_time
-                if elapsed_time >= timeout:
-                    print(f"Timeout reached after {timeout} seconds")
-                    break
-                
-                descent = self.descent_vector(wind_speed_mc,wind_direction_mc)
-                position[0] += descent[0]
-                position[1] += descent[1]
-                position[2] += descent[2]
-                altitude -= descent[2]
+#                 alt = int(altitude)  # convert to int
+#                 atmosphere = Atmosphere(alt)
+#                 # Calculate the density at this altitude
+#                 density = atmosphere.density
 
-            landing_spot = tuple(position[:2])
-            landing_spots.append(landing_spot)
-            altitudes.append(position[2])
+#                 # Generate a gust vector based on frequency and wind direction
+#                 gust_vector = self.gust_vector(density, wind_speed)
 
+#                 # Calculate gust magnitude from gust vector
+#                 gust_magnitude = np.linalg.norm(gust_vector)
 
-        print(f"Rocket landed! Spot: {landing_spots} Number of trials: {num_trials}")
-        print(f"Minimum altitude: {min(altitudes)}")
-        print(f"Maximum altitude: {max(altitudes)}")
-
-        # generate scatter plot of landing coordinates and altitudes
-        fig, ax = plt.subplots()
-        # scatter = ax.scatter([x[0] for x in landing_spots], [x[1] for x in landing_spots], c=altitudes, cmap='cool')
-
-        #ax.plot(self.real_landing,'bo')
-        print("real landing",self.real_landing )
-
-        # Add marker for real landing spot
-        ax.plot(self.real_landing[0], self.real_landing[1], 'go', label='Real landing spot')
-        circle = Circle(self.real_landing, radius=1, color='blue', fill=False)
-        ax.add_artist(circle)
-
-        # Add marker for landing area
-        ax.plot([spot[0] for spot in landing_spots], [spot[1] for spot in landing_spots], 'rx')
-
-        ax.legend()
-        ax.set_title("Landing Coordinates")
-        ax.set_xlabel("X Coordinate")
-        ax.set_ylabel("Y Coordinate")
-        plt.show()
-
-        ax.set_title("Landing Coordinates")
-        ax.set_xlabel("X Coordinate")
-        ax.set_ylabel("Y Ccordinate")
-        plt.show()
-
-        # # create the basemap object
-        # m = Basemap(projection='mill', lon_0=0)
-
-        # # draw coastlines, countries, and states
-        # m.drawcoastlines()
-        # m.drawcountries()
-        # m.fillcontinents(color='white',lake_color='aqua')
-        # m.drawmapboundary(fill_color='aqua')
-
-        # # convert landing spots to map coordinates
-        # x, y = m([spot[1] for spot in landing_spots], [spot[0] for spot in landing_spots])
-
-        # # plot landing spots on the map
-        # m.scatter(x, y, s=5, marker='o', color='r')
-
-        # show the plot
-        # plt.show()
+#                 # Write data to CSV file
+#                 writer.writerow([altitude, gust_magnitude, wind_dir])
 
 
         
-    def generate_wind_profile(self,altitudes, wind_speed, wind_dir, turbulence_freq):
-        """
-        Generate a wind profile by combining the turbulence vectors with wind direction vectors for different altitudes.
-
-        Parameters:
-        altitudes   (list): List of altitudes at which the wind profile needs to be generated.
-        wind_speed  (float): Mean wind speed at the ground level. # TODO: Add to class objects. User should obtain from weather forecast. 
-        wind_dir    (str): Wind direction at the ground level in degrees.
-        turbulence_freq (int): Turbulence intensity at the ground level.
-
-        Returns:
-        wind_profile (list): A list of 3D vectors representing the wind profile at different altitudes.
-        """
-        # Generate wind profile at different altitudes
-        wind_profile = []  # x , y , z
-        for altitude in altitudes:
-            turbulence_vector = self.turbulence_vector(turbulence_freq, wind_dir)
-            wind_dir_vector = self.wind_direction(wind_dir)
-            # Compute the altitude factor based on the input altitude. 
-            # The altitude factor is used to adjust the magnitude of the wind vectors based on the altitude.
-            altitude_factor = (altitude / 10) ** (1 / 7)
-
-            # Set wind wind speed to vary with altitude according to a power law. # TODO: backup with source and specify per atmospheric layer.
-            wind_speed_factor = wind_speed * altitude_factor
-
-            # Combine the wind direction and the turbulence vector.
-            # This represents the direction and magnitude of the wind at the given altitude and location.
-            wind_vector = [wind_dir_vector[i] * wind_speed_factor + turbulence_vector[i] for i in range(3)]
-            wind_profile.append(wind_vector)
-        return wind_profile
         
-        
-    def plot_wind_profile_3d(wind_profile):
-        """
-        Plot the wind profile in 3D.
+#     def plot_wind_profile_3d(wind_profile):
+#         """
+#         Plot the wind profile in 3D.
 
-        Parameters:
-        wind_profile (list): A list of 3D vectors representing the wind profile.
+#         Parameters:
+#         wind_profile (list): A list of 3D vectors representing the wind profile.
 
-        Returns:
-        None
-        """
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-        for vector in wind_profile:
-            ax.quiver(0, 0, 0, vector[0], vector[1], vector[2])
-        plt.show()
+#         Returns:
+#         None
+#         """
+#         fig = plt.figure()
+#         ax = fig.add_subplot(111, projection='3d')
+#         ax.set_xlabel('X')
+#         ax.set_ylabel('Y')
+#         ax.set_zlabel('Z')
+#         for vector in wind_profile:
+#             ax.quiver(0, 0, 0, vector[0], vector[1], vector[2])
+#         plt.show()
 
-    def plot_wind_profile_2d(wind_profile):
-        """
-        Plot the wind profile in 2D.
+#     def plot_wind_profile_2d(wind_profile):
+#         """
+#         Plot the wind profile in 2D.
 
-        Parameters:
-        wind_profile (list): A list of 3D vectors representing the wind profile.
+#         Parameters:
+#         wind_profile (list): A list of 3D vectors representing the wind profile.
 
-        Returns:
-        None
-        """
-        plt.xlabel('X')
-        plt.ylabel('Y')
-        for vector in wind_profile:
-            plt.quiver(0, 0, vector[0], vector[1], scale=100)
-        plt.show()
+#         Returns:
+#         None
+#         """
+#         plt.xlabel('X')
+#         plt.ylabel('Y')
+#         for vector in wind_profile:
+#             plt.quiver(0, 0, vector[0], vector[1], scale=100)
+#         plt.show()
 
-    # stage.apogee_direction = []
-    # stage.apogee_position = []
+#     # stage.apogee_direction = []
+#     # stage.apogee_position = []
     
 
 
@@ -447,12 +434,12 @@ class Wind:
 # for altitude in range(100,1000,10):
 
 #     wind = Wind(altitude)
-#     print(f"Altitude: {altitude}, Turbulence Vector: {wind.turbulence_vector(20, 'north')}")
+#     print(f"Altitude: {altitude}, Turbulence Vector: {wind.gust_vector(20, 'north')}")
 
 # # Plot the wind direction and amplitude for each altitude
 # for altitude in range(100, 1010, 10):
 #     wind = Wind(altitude)
-#     amplitude = wind.turbulence_vector(20, 'north')
+#     amplitude = wind.gust_vector(20, 'north')
 #     direction = np.deg2rad(np.linspace(0, 360, len(amplitude)))
 #     plt.plot(direction, amplitude, label=f'{altitude} m')
 # plt.legend()
@@ -461,11 +448,11 @@ class Wind:
 # plt.title('Wind Turbulence at Different Altitudes')
 # plt.show()
 
-#Wind.simulate_turbulence(20, True)
-# high_turb = Wind.simulate_turbulence(100, False)
-# med_turb = Wind.simulate_turbulence(50, False)
-# low_turb = Wind.simulate_turbulence(20, False)
-# no_turb = Wind.simulate_turbulence(0, False)
+#Wind.get_noise(20, True)
+# high_turb = Wind.get_noise(100, False)
+# med_turb = Wind.get_noise(50, False)
+# low_turb = Wind.get_noise(20, False)
+# no_turb = Wind.get_noise(0, False)
 
 # print(low_turb)
 #print(Wind.wind_direction())
@@ -524,3 +511,24 @@ class Wind:
     #     v_list.append(Rocket.velocity)
     #     pos_list.append(Rocket.position)
     #     return drift
+
+
+    # ---------------------------------------------------- 
+    # # Generate wind profile at different altitudes
+    # wind_profile = []  # x , y , z
+    # for altitude in altitudes:
+    #     gust_vector = self.gust_vector(turbulence_freq, self.wind_speed, wind_dir)
+    #     wind_dir_vector = self.wind_direction(wind_dir)
+        
+    #     # Compute the altitude factor based on the input altitude. 
+    #     # The altitude factor is used to adjust the magnitude of the wind vectors based on the altitude.
+    #     # altitude_factor = (altitude / 10) ** (1 / 7)
+
+    #     # Set wind wind speed to vary with altitude according to a power law. # TODO: backup with source and specify per atmospheric layer.
+    #     # gust_vector = wind_speed * altitude_factor
+
+    #     # Combine the wind direction and the turbulence vector.
+    #     # This represents the direction and magnitude of the wind at the given altitude and location.
+    #     wind_vector = [wind_dir_vector[i] + gust_vector[i] for i in range(3)]
+    #     wind_profile.append(wind_vector)
+    # return wind_profile

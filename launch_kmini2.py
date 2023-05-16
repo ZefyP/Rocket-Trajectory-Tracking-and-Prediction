@@ -51,13 +51,19 @@ launch_site = Launchsite(
 rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = False)
 
 rocket.stages = [kmini2_L]
-rocket.run_simulation()
+# rocket.run_simulation()
 
 
 """ Test the rocket landing spot method """
-wind = Wind(255) 
+wind = Wind(
+            altitude = 255,
+            wind_speed = 5,
+            wind_direction = 'north',
+            frequency = 20 # hz for noise sample. 20hz is every 50th sample
+            ) 
 
-wind.plot_wind(20,'north') # 20hz is every 50th sample
+#wind.plot_wind(altitude, 'north') 
+wind.generate_wind_profile(0,50000) # use only once
 
 #rocket = Rocket(apogee=1000, apogee_direction=90)  # apogee of 10000 feet, direction straight up
 #landing_spot = wind.land_spot()
@@ -73,7 +79,7 @@ wind.plot_wind(20,'north') # 20hz is every 50th sample
 # dens = Atmosphere(364)
 # print("this is hte density!!", dens.density)
 
-# Wind.simulate_turbulence(20)
+# Wind.generate_gusts(20)
 # flight_data.plot_mach_cd()
 # flight_data.get_time_accel_z()
 
