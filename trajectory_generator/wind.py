@@ -24,11 +24,14 @@ Adding methods to plot the wind profile in 3D and 2D.
 # """
 
 class Wind:
+
+    effective_area = 1.52 # m/s^2
     def __init__(self, 
-                 altitude, 
-                 wind_speed: float, 
-                 wind_direction: str, 
-                 frequency: int):
+                 altitude,              # m
+                 wind_speed: float,     # m/s
+                 wind_direction: str,   # ENU [east,north,up]
+                 frequency: int,        # hz
+                 ):  
         
         self.atmosphere = Atmosphere(altitude)
         self.wind_speed = wind_speed
@@ -36,7 +39,23 @@ class Wind:
         self.frequency = frequency
         self.altitude = altitude
 
-
+        # self.effective_area = effective_area # TODO: split the areas, as chute and rocket have different cd. add function in stage utilising the state of flight, parachute and rocket dimensions.
+    def calc_effective_area(self, outer_diam, length, chute_diam):
+        """
+        Calculate the effective area of side wind on a vertical rocket with a parachute attached.
+        The rocket is assumed to be a cylinder, and the parachute is assumed to be elliptical.
+        """     
+        # Calculate the cross-sectional area of the rocket
+        cross_sectional_area = math.pi * (outer_diam / 2)**2
+        
+        # Calculate the area of the exposed part of the rocket
+        exposed_area = outer_diam * length
+        
+        # Calculate the effective area of side wind
+        effective_area = exposed_area + cross_sectional_area
+        
+        return effective_area
+    
     def get_noise(self, plotting=False): # not used for now
         """
         Generate pink noise, filter it to simulate turbulence, and extract samples at a specified frequency.
@@ -160,6 +179,11 @@ class Wind:
         # print(f"Wind Direction: {wind_dir}") # DEBUG
         return wind_dir
     
+    def gust_force_rocket(self, gust_force):
+        
+        wind_force = gust_force * self.effective_area
+        return wind_force
+    
 
     def generate_wind_profile(self,min=0,max=50001):
         print("Generating a new wind profile...")
@@ -176,7 +200,13 @@ class Wind:
 
             atmos = Atmosphere(int(h))
             density = atmos.density
-            gust_force = density * self.wind_speed**2
+
+            # Calculate the wind gust force
+            # warning: this is NOT the force acting the on the rocket. 
+            # The dynamic pressure exerted by the wind on a flat plate perpendicular to the wind direction.
+            gust_force = density * self.wind_speed**2 
+            
+            
             gust_force = np.round(gust_force,2)
             
             # Generate turbulence
@@ -210,8 +240,12 @@ class Wind:
 
         # Scale the wind vector based on wind direction
         unit_vector = self.wind_dir_vector(direction)
-        wind_speed = np.linalg.norm(wind_vector)
-        scaled_vector = wind_speed * unit_vector
+        gust_force = np.linalg.norm(wind_vector)
+        scaled_vector = gust_force * unit_vector
+
+
+        # wind vector on rocket
+        scaled_vector = self.gust_force_rocket(scaled_vector)
         print(scaled_vector) # DEBUG
         return scaled_vector
     
@@ -225,25 +259,38 @@ class Wind:
             data = np.genfromtxt(wp_filepath, delimiter=',', skip_header=1, dtype=np.float32, invalid_raise=False, usemask=True)
             # data = data[~np.isnan(data).any(axis=1)]
 
-
-        fig = plt.figure()
-        ax = fig.add_subplot(projection='3d')
-        
         # Extract ENU wind vectors
         wind_vectors = data[:, 1:]
         ENU = wind_vectors[:, [0, 1, 2]]  # TODO: Swap Y and Z axis for consistency with ENU convention
+        wind_magnitude = np.linalg.norm(wind_vectors,axis=1)
+
+        force_on_rocket = self.gust_force_rocket(wind_magnitude)
+
+        altitude = data[:,0]
+
+
+        fig, ax = plt.subplots()
+        ax.plot(force_on_rocket,altitude, label='Force acting on the rocket')
+        ax.plot(wind_magnitude, altitude, label='Wind Force')
+        ax.set_xlabel('Wind Force (N')
+        ax.set_ylabel('Altitude (m)')
+        ax.set_title('Generated Wind Force Profile (ground wind speed: 5 m/s)')
+        plt.legend()
+        plt.show()
+
+        # # Plot 3D wind vectors
+        #ax = fig.add_subplot(projection='3d')
+        # for i, (x, y, z) in enumerate(ENU):
+        #     ax.quiver(0, 0, i, x, y, z, length=1, normalize=True, arrow_length_ratio=0.1)
         
-        # Plot wind vectors
-        for i, (x, y, z) in enumerate(ENU):
-            ax.quiver(0, 0, i, x, y, z, length=1, normalize=True, arrow_length_ratio=0.1)
-        
-        # Set axis labels and limits
-        ax.set_xlabel('East')
-        ax.set_ylabel('North')
-        ax.set_zlabel('Up')
-        ax.set_xlim(-50, 50)
-        ax.set_ylim(-50, 50)
-        ax.set_zlim(0, len(data))
+        # # Set axis labels and limits
+        # ax.set_xlabel('East')
+        # ax.set_ylabel('North')
+        # ax.set_zlabel('Up')
+        # ax.set_xlim(-50, 50)
+        # ax.set_ylim(-50, 50)
+        # ax.set_zlim(0, len(data))
+
         
         plt.show()
 

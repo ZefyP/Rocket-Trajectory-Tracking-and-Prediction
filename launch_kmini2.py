@@ -60,11 +60,13 @@ wind = Wind(
             wind_speed = 5,
             wind_direction = 'north',
             frequency = 20 # hz for noise sample. 20hz is every 50th sample
+            #effective_area = Cd * A
+
             ) 
 
 #wind.plot_wind(altitude, 'north') 
 #wind.generate_wind_profile(0,500) # use only once and then comment out
-wp_filepath = "C:\ergasia\projects\Rocket-Trajectory-Tracking-and-Prediction\wind_profile_0-499_5_north_20.csv"
+wp_filepath = "C:\ergasia\projects\Rocket-Trajectory-Tracking-and-Prediction\wind_profile_0-50000_5_north_20.csv"
 wind.plot_wind_profile(wp_filepath)
 
 #rocket = Rocket(apogee=1000, apogee_direction=90)  # apogee of 10000 feet, direction straight up
