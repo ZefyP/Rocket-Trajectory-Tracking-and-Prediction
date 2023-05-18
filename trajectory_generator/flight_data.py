@@ -201,7 +201,7 @@ class Flight_Data:
 
 
     # This is tailored to OPEN ROCKET FILES 
-    def read_OR_csv_col(self, OR_data_filepath,column):
+    def read_OR_csv_col(self,column):
         # Define a function to resample the data based on a desired sample time
  
         # Read the CSV file
@@ -250,7 +250,7 @@ class Flight_Data:
 
 
     def fetch_cd(self):
-        cd, _ = self.read_OR_csv_col(self.OR_data_filepath,29) # ignore the column header
+        cd, _ = self.read_OR_csv_col(29) # ignore the column header
         cd = self.replace_nan(cd, replace_with= 0) # this will replace all nan in the array with 0
         
         # print("--------------------------------I am in fetch_cd !!!!!!!!!")
@@ -258,7 +258,7 @@ class Flight_Data:
         return cd
 
     def fetch_mach(self):
-        mach, _ = self.read_OR_csv_col(self.OR_data_filepath,25) # ignore the column header
+        mach, _ = self.read_OR_csv_col(25) # ignore the column header
         mach = self.replace_nan(mach, replace_with= 0) # this will replace all nan in the array with 0
         
         # print("--------------------------------I am in fetch_mach !!!!!!!!!")

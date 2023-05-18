@@ -379,7 +379,7 @@ class Rocket:
 
         apogee = np.amax(altitude)
         
-        plt.axhline(y=apogee, color='r', linestyle='-')
+        #plt.axhline(y=apogee, color='r', linestyle='-')
         self.log(f"[{self.name}] Apogee is {apogee / 1000}km")
         plt.show()
 
@@ -443,7 +443,7 @@ class Rocket:
 
     def plot_accel(self):
         for stage in self.stages:
-            accel = np.linalg.norm(stage.acceleration[0,:], axis=0)
+            accel = np.linalg.norm(stage.acceleration, axis=0)
             plt.plot(stage.time, accel, label=stage.name)
         plt.legend()
         plt.xlabel("Time (seconds)")

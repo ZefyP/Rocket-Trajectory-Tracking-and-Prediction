@@ -51,7 +51,7 @@ launch_site = Launchsite(
 rocket = Rocket("KMini2", "Sunride", launch_site, use_cd_file = False)
 
 rocket.stages = [kmini2_L]
-# rocket.run_simulation()
+rocket.run_simulation()
 
 
 """ Test the rocket landing spot method """
@@ -64,22 +64,23 @@ wind = Wind(
 
             ) 
 
+""" Generate desired wind profile or load an existing """
 #wind.plot_wind(altitude, 'north') 
 #wind.generate_wind_profile(0,500) # use only once and then comment out
 wp_filepath = "C:\ergasia\projects\Rocket-Trajectory-Tracking-and-Prediction\wind_profile_0-50000_5_north_20.csv"
-wind.plot_wind_profile(wp_filepath)
+# wind.plot_wind_profile(wp_filepath)
 
+
+""" Test Landing Area prediction """
 #rocket = Rocket(apogee=1000, apogee_direction=90)  # apogee of 10000 feet, direction straight up
 #landing_spot = wind.land_spot()
 #print(landing_spot)  # prints the x and y coordinates of the landing spot
-
 # wind.landing_area()
 
-
-# Save the simulated altitude and compate with real data 
+"""Save the simulated altitude and compare with real data """
 # rocket.generate_csv_altitude_vs_time()
-# rocket.plot_altitude_range()
-
+#rocket.plot_altitude_range()
+rocket.plot_all()
 # dens = Atmosphere(364)
 # print("this is hte density!!", dens.density)
 
