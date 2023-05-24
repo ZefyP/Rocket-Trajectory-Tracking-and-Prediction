@@ -8,26 +8,17 @@ The software architecture of the rocket trajectory tracking and prediction proje
 
 ```
 Rocket Trajectory Tracking and Prediction
-|
-|-- build/                     # Compiled files (alternatively `dist`)
-|-- docs/                      # Documentation files (alternatively `doc`)
-|-- src/                       # Source files (alternatively `lib` or `app`)
-|-- test/                      # Automated tests (alternatively `spec` or `tests`)
-|-- tools/                     # Tools and utilities
+
+
+|-- example/
+|-- launch_kmini2.py
+|-- dart_launch.py
+|-- launch_tr2.py
+|-- lower_stage_altitude_vs_time.csv
+|-- requirements.txt
 |-- LICENSE
 |-- README.md
 |-- .gitignore
-|-- dart_launch.py
-|-- dist/
-|-- example/
-|-- example_missile.py
-|-- FolderList.txt
-|-- launch_kmini2.py
-|-- launch_tr2.py
-|-- lower_stage_altitude_vs_time.csv
-|-- output/
-|-- package-lock.json
-|-- requirements.txt
 |-- trajectory_generator/      # Directory for trajectory generator module
 |--|-- atmosphere.py
 |--|-- baro_plot.py
@@ -48,7 +39,7 @@ Rocket Trajectory Tracking and Prediction
 |--|-- utils.py
 |--|-- wind.py
 |--|-- __init__.py
-|--|-- __pycache__/
+
 ```
 
 # Usage
