@@ -2,12 +2,6 @@
 
 This repository contains code to predict the trajectory of a rocket. It implements an algorithm to determine the predicted trajectory and range of a rocket, as well as a viaerty of flight performance metrics as well as taking into account various factors, such as speed, acceleration, and wind profile at the location of launch.
 
-# Features
-
-- Imports a Cd curve from an external file
-- Accounts for different wind profiles and gusts of wind.
-
-
 ## Software Architecture
 
 The software architecture of the rocket trajectory tracking and prediction project can be represented as follows:
