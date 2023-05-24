@@ -18,11 +18,6 @@ import csv
 import torch
 import pandas as pd
 
-"""
-TODO:
-Adding methods to plot the wind profile in 3D and 2D.
-# """
-
 class Wind:
 
     effective_area = 1.52 # m/s^2
@@ -56,7 +51,7 @@ class Wind:
         
         return effective_area
     
-    def get_noise(self, plotting=False): # not used for now
+    def get_noise(self, plotting=False): 
         """
         Generate pink noise, filter it to simulate turbulence, and extract samples at a specified frequency.
 
@@ -81,20 +76,14 @@ class Wind:
             b, a = signal.butter(1, 1/(2*np.pi*frequency), 'highpass', fs=1000)
             pink_noise = signal.filtfilt(b, a, white_noise)
 
-            # Extract samples from every 50th sample at the given frequency
-            # i.e. every 50th sample to simulate turbulence at 20 Hz.
-            # Extract samples i.e.at 20 Hz
+            # Extract samples from every 50th sample at the given frequency ie. every 50th sample to simulate turbulence at 20 Hz.
             samples = pink_noise[::int(1000/frequency)]
-
             # Apply absolute function to ensure all values are positive
             samples = np.abs(samples)
             # Normalise the data to lie between 0 and 1.
             samples = samples / np.max(samples)
-            
             # Reshape into a 1-dimensional array: [no of samples]
             samples = samples.flatten()
-            # samples = samples.reshape(samples,1)
-            # samples_20hz = pink_noise[::50]
 
         if plotting == True:
             # Plot white and pink noise
@@ -242,13 +231,10 @@ class Wind:
         unit_vector = self.wind_dir_vector(direction)
         gust_force = np.linalg.norm(wind_vector)
         scaled_vector = gust_force * unit_vector
-
-
         # wind vector on rocket
         scaled_vector = self.gust_force_rocket(scaled_vector)
         print(scaled_vector) # DEBUG
         return scaled_vector
-    
         
     def plot_wind_profile(self,wp_filepath):
         with open(wp_filepath, 'r') as f:
@@ -263,9 +249,7 @@ class Wind:
         wind_vectors = data[:, 1:]
         ENU = wind_vectors[:, [0, 1, 2]]  # TODO: Swap Y and Z axis for consistency with ENU convention
         wind_magnitude = np.linalg.norm(wind_vectors,axis=1)
-
         force_on_rocket = self.gust_force_rocket(wind_magnitude)
-
         altitude = data[:,0]
 
 
